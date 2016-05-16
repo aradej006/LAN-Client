@@ -1,0 +1,54 @@
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) ) {
+				name: "panel2"
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "connectBtn"
+					"text": "Connect"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "loginBtn"
+					"text": "Login"
+					"enabled": false
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "loginBtnActionPerformed", true ) )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "North"
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTree" ) {
+					name: "tree1"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "West"
+			} )
+			menuBar: new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
+				name: "menuBar1"
+				add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+					name: "optionsMenu"
+					"text": "Options"
+					add( new FormComponent( "javax.swing.JMenuItem" ) {
+						name: "networkMenu"
+						"text": "Network"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "networkMenuActionPerformed", true ) )
+					} )
+					add( new FormComponent( "javax.swing.JMenuItem" ) {
+						name: "credentials"
+						"text": "Credentials"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "credentialsActionPerformed", true ) )
+					} )
+				} )
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}

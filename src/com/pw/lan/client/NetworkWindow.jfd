@@ -1,0 +1,54 @@
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "saveBtn"
+				"text": "Save"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "South"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "panel1"
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label1"
+					"text": "IP address"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "North"
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label2"
+					"text": "Port"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "West"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "panel2"
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "ipAddressField"
+					"preferredSize": new java.awt.Dimension( 200, 31 )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "North"
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "portField"
+					"text": "10000"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "East"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}

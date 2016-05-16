@@ -21,8 +21,10 @@ public class Client implements Runnable {
     private ObjectInputStream input;
     private ObjectOutputStream output;
     private String name;
+    private boolean loggedIn = false;
 
     public Client(String host, String port) throws Exception {
+        name = InetAddress.getLocalHost().getHostName();
         LOGGER.log(Level.INFO, "Client: Creating client {0}", name);
         socket = new Socket(host, Integer.parseInt(port));
         LOGGER.log(Level.INFO, "Client: {0} getting streams...", name);
@@ -30,7 +32,6 @@ public class Client implements Runnable {
         output.flush();
         input = new ObjectInputStream(socket.getInputStream());
         LOGGER.log(Level.INFO, "Client: {0} got streams.", name);
-        name = InetAddress.getLocalHost().getHostName();
         new Thread(this).start();
         Map<String,String> map = new HashMap<>();
         map.put(Msg.TYPE,Msg.HELLO);
@@ -75,10 +76,14 @@ public class Client implements Runnable {
         if (data == null) {
             return false;
         } else{
-            LOGGER.log(Level.INFO, "Client: Received data : {1}", data);
+            LOGGER.log(Level.INFO, "Client: Received data : {0}", data.toString());
             if (data instanceof Map) {
                 Map msgs = (Map) data;
-                //else if expressions
+                if(msgs.get(Msg.TYPE).toString().equals(Msg.DO_LOGIN)){
+                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)){
+                    loggedIn = true;
+                    this.notify();
+                }
             }else{
                 LOGGER.log(Level.INFO, "Client: Received bad data.");
             }
@@ -104,6 +109,21 @@ public class Client implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+    }
+
+    public boolean login(String login, String password){
+        Map msgs = new HashMap<String, String>();
+        msgs.put(Msg.TYPE,Msg.LOGIN);
+        msgs.put(Msg.LOGIN,login);
+        msgs.put(Msg.PASSWORD,password);
+        msgs.put(Msg.ALGORITHM,"SHA-256");
+        send(msgs);
+        try {
+            this.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return loggedIn;
     }
 
 }
