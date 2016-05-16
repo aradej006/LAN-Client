@@ -7,42 +7,72 @@
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="78c4" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+      <grid id="78c4" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="Center"/>
-        <properties/>
-        <border type="none"/>
-        <children/>
-      </grid>
-      <grid id="499db" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
-        <constraints border-constraint="West"/>
         <properties>
-          <preferredSize width="220" height="51"/>
+          <maximumSize width="300" height="32767"/>
+          <preferredSize width="300" height="88"/>
         </properties>
         <border type="none"/>
         <children>
-          <component id="5f54c" class="javax.swing.JTextField" binding="ipAddress">
-            <constraints/>
+          <grid id="e02ec" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="West"/>
             <properties>
-              <doubleBuffered value="true"/>
-              <minimumSize width="200" height="31"/>
-              <preferredSize width="200" height="31"/>
+              <preferredSize width="100" height="42"/>
             </properties>
-            <clientProperties>
-              <caretWidth class="java.lang.Integer" value="0"/>
-            </clientProperties>
-          </component>
-          <component id="5894e" class="javax.swing.JTextField" binding="port">
-            <constraints/>
+            <border type="none"/>
+            <children>
+              <component id="dc2e5" class="javax.swing.JLabel">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <alignmentX value="0.5"/>
+                  <autoscrolls value="false"/>
+                  <horizontalAlignment value="0"/>
+                  <text value="IP address"/>
+                  <verifyInputWhenFocusTarget value="true"/>
+                </properties>
+              </component>
+              <component id="53897" class="javax.swing.JLabel">
+                <constraints border-constraint="South"/>
+                <properties>
+                  <horizontalAlignment value="0"/>
+                  <text value="Port"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="5cd55" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="East"/>
             <properties>
-              <doubleBuffered value="true"/>
-              <preferredSize width="200" height="31"/>
+              <preferredSize width="200" height="62"/>
             </properties>
-            <clientProperties>
-              <caretWidth class="java.lang.Integer" value="0"/>
-            </clientProperties>
-          </component>
+            <border type="none"/>
+            <children>
+              <component id="5f54c" class="javax.swing.JTextField" binding="ipAddress">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <doubleBuffered value="true"/>
+                  <minimumSize width="200" height="31"/>
+                  <preferredSize width="200" height="31"/>
+                </properties>
+                <clientProperties>
+                  <caretWidth class="java.lang.Integer" value="0"/>
+                </clientProperties>
+              </component>
+              <component id="5894e" class="javax.swing.JTextField" binding="port">
+                <constraints border-constraint="South"/>
+                <properties>
+                  <doubleBuffered value="true"/>
+                  <preferredSize width="200" height="31"/>
+                </properties>
+                <clientProperties>
+                  <caretWidth class="java.lang.Integer" value="0"/>
+                </clientProperties>
+              </component>
+            </children>
+          </grid>
           <component id="d34e" class="javax.swing.JButton" binding="connect">
-            <constraints/>
+            <constraints border-constraint="South"/>
             <properties>
               <text value="Connect"/>
             </properties>

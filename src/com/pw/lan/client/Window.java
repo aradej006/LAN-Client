@@ -34,6 +34,7 @@ public class Window extends JFrame{
         setContentPane(rootPanel);
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setVisible(true);
 
         connect.addActionListener(new ActionListener() {
