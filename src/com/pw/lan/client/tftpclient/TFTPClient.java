@@ -32,7 +32,7 @@ public class TFTPClient extends Thread {
 			
 		} catch (UnknownHostException unknownHost) {
 			
-			TFTPUtils.fatalError("Unknown host " + server_ip);
+			TFTPUtils.fatalError("Unknown host  " + server_ip);
 			
 		} catch (IOException ioException) {
 			
@@ -51,7 +51,7 @@ public class TFTPClient extends Thread {
 		
 		try {
 			
-			fin = new DataInputStream(new FileInputStream("D:\\Users\\Vilius\\Desktop\\tftp\\java\\src\\tftpclient\\" + filename));
+			fin = new DataInputStream(new FileInputStream(filename));
 			
 		} catch (Exception e) {
 
