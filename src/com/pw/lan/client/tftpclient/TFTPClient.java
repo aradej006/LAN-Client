@@ -32,7 +32,7 @@ public class TFTPClient extends Thread {
 			
 		} catch (UnknownHostException unknownHost) {
 			
-			TFTPUtils.fatalError("Unknown host " + server_ip);
+			TFTPUtils.fatalError("Unknown host  " + server_ip);
 			
 		} catch (IOException ioException) {
 			
