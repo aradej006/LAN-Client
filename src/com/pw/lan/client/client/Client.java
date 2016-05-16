@@ -1,5 +1,6 @@
 package com.pw.lan.client.client;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -24,9 +25,12 @@ public class Client implements Runnable {
     private boolean loggedIn = false;
 
     public Client(String host, String port) throws Exception {
+        System.setProperty("javax.net.ssl.trustStore", "keystore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
         name = InetAddress.getLocalHost().getHostName();
         LOGGER.log(Level.INFO, "Client: Creating client {0}", name);
-        socket = new Socket(host, Integer.parseInt(port));
+//        socket = new Socket(host, Integer.parseInt(port));
+        socket = SSLSocketFactory.getDefault().createSocket(host,Integer.parseInt(port));
         LOGGER.log(Level.INFO, "Client: {0} getting streams...", name);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.flush();
@@ -80,6 +84,7 @@ public class Client implements Runnable {
             if (data instanceof Map) {
                 Map msgs = (Map) data;
                 if(msgs.get(Msg.TYPE).toString().equals(Msg.DO_LOGIN)){
+                    //do something
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)){
                     loggedIn = true;
                     this.notify();
