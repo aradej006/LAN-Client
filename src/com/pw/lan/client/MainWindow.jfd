@@ -5,18 +5,27 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 			name: "this"
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) ) {
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "panel2"
-				add( new FormComponent( "javax.swing.JButton" ) {
-					name: "connectBtn"
-					"text": "Connect"
-					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
-				} )
-				add( new FormComponent( "javax.swing.JButton" ) {
-					name: "loginBtn"
-					"text": "Login"
-					"enabled": false
-					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "loginBtnActionPerformed", true ) )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel5"
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "connectBtn"
+						"text": "Connect"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "West"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "loginBtn"
+						"text": "Login"
+						"enabled": false
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "loginBtnActionPerformed", true ) )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "West"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "North"
@@ -25,9 +34,48 @@ new FormModel {
 				name: "scrollPane1"
 				add( new FormComponent( "javax.swing.JTree" ) {
 					name: "tree1"
+					"preferredSize": new java.awt.Dimension( 108, 82 )
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "West"
+				"value": "Center"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "propPanel"
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label1"
+					"text": "Properties"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "North"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel3"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "West"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel4"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "East"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "East"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "infoPanel"
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "actionLbl"
+					"text": "Action"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "East"
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "statusLbl"
+					"text": "Status"
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "West"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "South"
 			} )
 			menuBar: new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
 				name: "menuBar1"
@@ -47,7 +95,7 @@ new FormModel {
 				} )
 			}
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 0, 0 )
+			"location": new java.awt.Point( 10, 5 )
 			"size": new java.awt.Dimension( 400, 300 )
 		} )
 	}

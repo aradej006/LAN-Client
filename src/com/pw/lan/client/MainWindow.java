@@ -23,6 +23,7 @@ public class MainWindow extends JFrame {
     private Client client;
 
     public MainWindow() {
+        super("LAN Client App");
         mainWindow = this;
         initComponents();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -30,7 +31,7 @@ public class MainWindow extends JFrame {
     }
 
     private void networkMenuActionPerformed(ActionEvent e) {
-        NetworkWindow networkWindow = new NetworkWindow(this, "network");
+        new NetworkWindow(this, "network");
     }
 
     private void connectBtnActionPerformed(ActionEvent e) {
@@ -57,7 +58,7 @@ public class MainWindow extends JFrame {
     }
 
     private void credentialsActionPerformed(ActionEvent e) {
-        NetworkWindow networkWindow = new NetworkWindow(this, "credentials");
+        new NetworkWindow(this, "credentials");
     }
 
     private void initComponents() {
@@ -68,10 +69,18 @@ public class MainWindow extends JFrame {
         networkMenu = new JMenuItem();
         credentials = new JMenuItem();
         panel2 = new JPanel();
+        panel5 = new JPanel();
         connectBtn = new JButton();
         loginBtn = new JButton();
         scrollPane1 = new JScrollPane();
         tree1 = new JTree();
+        propPanel = new JPanel();
+        label1 = new JLabel();
+        panel3 = new JPanel();
+        panel4 = new JPanel();
+        infoPanel = new JPanel();
+        actionLbl = new JLabel();
+        statusLbl = new JLabel();
 
         //======== this ========
         Container contentPane = getContentPane();
@@ -108,26 +117,71 @@ public class MainWindow extends JFrame {
                     javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
                     java.awt.Color.red), panel2.getBorder())); panel2.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
-            panel2.setLayout(new FlowLayout());
+            panel2.setLayout(new BorderLayout());
 
-            //---- connectBtn ----
-            connectBtn.setText("Connect");
-            connectBtn.addActionListener(e -> connectBtnActionPerformed(e));
-            panel2.add(connectBtn);
+            //======== panel5 ========
+            {
+                panel5.setLayout(new BorderLayout());
 
-            //---- loginBtn ----
-            loginBtn.setText("Login");
-            loginBtn.setEnabled(false);
-            loginBtn.addActionListener(e -> loginBtnActionPerformed(e));
-            panel2.add(loginBtn);
+                //---- connectBtn ----
+                connectBtn.setText("Connect");
+                connectBtn.addActionListener(e -> connectBtnActionPerformed(e));
+                panel5.add(connectBtn, BorderLayout.WEST);
+
+                //---- loginBtn ----
+                loginBtn.setText("Login");
+                loginBtn.setEnabled(false);
+                loginBtn.addActionListener(e -> loginBtnActionPerformed(e));
+                panel5.add(loginBtn, BorderLayout.EAST);
+            }
+            panel2.add(panel5, BorderLayout.WEST);
         }
         contentPane.add(panel2, BorderLayout.NORTH);
 
         //======== scrollPane1 ========
         {
+
+            //---- tree1 ----
+            tree1.setPreferredSize(new Dimension(108, 82));
             scrollPane1.setViewportView(tree1);
         }
-        contentPane.add(scrollPane1, BorderLayout.WEST);
+        contentPane.add(scrollPane1, BorderLayout.CENTER);
+
+        //======== propPanel ========
+        {
+            propPanel.setLayout(new BorderLayout());
+
+            //---- label1 ----
+            label1.setText("Properties");
+            propPanel.add(label1, BorderLayout.NORTH);
+
+            //======== panel3 ========
+            {
+                panel3.setLayout(new BorderLayout());
+            }
+            propPanel.add(panel3, BorderLayout.WEST);
+
+            //======== panel4 ========
+            {
+                panel4.setLayout(new BorderLayout());
+            }
+            propPanel.add(panel4, BorderLayout.EAST);
+        }
+        contentPane.add(propPanel, BorderLayout.EAST);
+
+        //======== infoPanel ========
+        {
+            infoPanel.setLayout(new BorderLayout());
+
+            //---- actionLbl ----
+            actionLbl.setText("Action");
+            infoPanel.add(actionLbl, BorderLayout.EAST);
+
+            //---- statusLbl ----
+            statusLbl.setText("Status");
+            infoPanel.add(statusLbl, BorderLayout.WEST);
+        }
+        contentPane.add(infoPanel, BorderLayout.SOUTH);
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
@@ -156,9 +210,17 @@ public class MainWindow extends JFrame {
     private JMenuItem networkMenu;
     private JMenuItem credentials;
     private JPanel panel2;
+    private JPanel panel5;
     private JButton connectBtn;
     private JButton loginBtn;
     private JScrollPane scrollPane1;
     private JTree tree1;
+    private JPanel propPanel;
+    private JLabel label1;
+    private JPanel panel3;
+    private JPanel panel4;
+    private JPanel infoPanel;
+    private JLabel actionLbl;
+    private JLabel statusLbl;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
