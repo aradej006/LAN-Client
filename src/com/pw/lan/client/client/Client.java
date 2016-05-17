@@ -1,5 +1,7 @@
 package com.pw.lan.client.client;
 
+import com.pw.lan.client.MainWindow;
+
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,6 +25,11 @@ public class Client implements Runnable {
     private ObjectOutputStream output;
     private String name;
     private boolean loggedIn = false;
+    private MainWindow mainWindow;
+
+    public void setMainWindow(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+    }
 
     public Client(String host, String port) throws Exception {
         System.setProperty("javax.net.ssl.trustStore", "keystore.jks");
@@ -88,6 +95,11 @@ public class Client implements Runnable {
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)){
                     loggedIn = true;
                     this.notify();
+                    msgs = new HashMap<>();
+                    msgs.put(Msg.TYPE, Msg.GETFILES);
+                    send(msgs);
+                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.FILES)){
+                    mainWindow.updateJTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
                 }
             }else{
                 LOGGER.log(Level.INFO, "Client: Received bad data.");
@@ -116,7 +128,7 @@ public class Client implements Runnable {
             }
     }
 
-    public boolean login(String login, String password){
+    public synchronized boolean login(String login, String password){
         Map msgs = new HashMap<String, String>();
         msgs.put(Msg.TYPE,Msg.LOGIN);
         msgs.put(Msg.LOGIN,login);
