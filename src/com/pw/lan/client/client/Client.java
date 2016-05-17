@@ -99,7 +99,7 @@ public class Client implements Runnable {
                     msgs.put(Msg.TYPE, Msg.GETFILES);
                     send(msgs);
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.FILES)){
-                    mainWindow.updateJTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
+                    mainWindow.updateFilesTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
                 }
             }else{
                 LOGGER.log(Level.INFO, "Client: Received bad data.");
@@ -143,4 +143,10 @@ public class Client implements Runnable {
         return loggedIn;
     }
 
+    public void getFiles(String filesPath){
+        Map<String,String> msgs = new HashMap<>();
+        msgs.put(Msg.TYPE, Msg.GETFILES);
+        msgs.put(Msg.FILESPATH,filesPath);
+        send(msgs);
+    }
 }

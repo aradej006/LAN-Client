@@ -4,6 +4,7 @@
 
 package com.pw.lan.client;
 
+import javax.swing.event.*;
 import com.pw.lan.client.client.Client;
 
 import java.awt.*;
@@ -14,6 +15,7 @@ import java.util.Map;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 /**
  * @author Adrian Radej
@@ -25,12 +27,14 @@ public class MainWindow extends JFrame {
     private String login;
     private String password;
     private Client client;
+    private boolean expandingFilesTree;
 
     public MainWindow() {
         super("LAN Client App");
         initComponents();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
+        expandingFilesTree = false;
     }
 
     private void networkMenuActionPerformed(ActionEvent e) {
@@ -65,29 +69,36 @@ public class MainWindow extends JFrame {
         new NetworkWindow(this, "credentials");
     }
 
-    public void updateJTree(String filesPath, Map<String,String> files){
-        String[] splited = filesPath.split("/");
+    public void updateFilesTree(String filesPath, Map<String,String> files){
+        String[] split = filesPath.split("/");
         DefaultTreeModel model = (DefaultTreeModel) fileTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
         DefaultMutableTreeNode node = root;
         root.setUserObject("root");
-        if(splited.length==1) root.removeAllChildren();
-        for(int i=1;i<splited.length;i++){
-            Enumeration childern = root.children();
-            while(childern.hasMoreElements()){
-                DefaultMutableTreeNode n = (DefaultMutableTreeNode)childern.nextElement();
-                if(n.getUserObject().equals(splited[i])){
+        if(split.length==1) root.removeAllChildren();
+        for(int i=1;i<split.length;i++){
+            Enumeration children = node.children();
+            while(children.hasMoreElements()){
+                DefaultMutableTreeNode n = (DefaultMutableTreeNode)children.nextElement();
+                if(n.getUserObject().equals(split[i])){
                     node = n;
+                    if(i==split.length-1){
+                        node.removeAllChildren();
+                    }
                     break;
                 }
             }
         }
         for (String key : files.keySet()) {
-            node.add(new DefaultMutableTreeNode(key));
-            //// TODO: 2016-05-17 add items to directories
+            DefaultMutableTreeNode n = new DefaultMutableTreeNode(key);
+            if(files.get(key).split(" ")[0].equals("dir")){
+                n.add(new DefaultMutableTreeNode("<items>"));
+            }
+            node.add(n);
         }
-
         model.reload(root);
+        fileTree.expandPath(new TreePath(node.getPath()));
+        expandingFilesTree = false;
     }
 
     private void button2ActionPerformed(ActionEvent e) {
@@ -106,6 +117,14 @@ public class MainWindow extends JFrame {
         node1.add(node3);
         node1.add(node4);
         model.reload(root);
+    }
+
+    private void fileTreeTreeExpanded(TreeExpansionEvent e) {
+        if( !expandingFilesTree ){
+            String filesPath = e.getPath().toString().substring(1,e.getPath().toString().length()-1).replace(", ","/") + "/";
+            client.getFiles(filesPath);
+            expandingFilesTree = true;
+        }
     }
 
     private void initComponents() {
@@ -188,6 +207,16 @@ public class MainWindow extends JFrame {
 
         //======== scrollPane1 ========
         {
+
+            //---- fileTree ----
+            fileTree.addTreeExpansionListener(new TreeExpansionListener() {
+                @Override
+                public void treeCollapsed(TreeExpansionEvent e) {}
+                @Override
+                public void treeExpanded(TreeExpansionEvent e) {
+                    fileTreeTreeExpanded(e);
+                }
+            });
             scrollPane1.setViewportView(fileTree);
         }
         contentPane.add(scrollPane1, BorderLayout.CENTER);

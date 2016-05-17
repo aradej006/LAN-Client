@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_66" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -34,6 +34,7 @@ new FormModel {
 				name: "scrollPane1"
 				add( new FormComponent( "javax.swing.JTree" ) {
 					name: "fileTree"
+					addEvent( new FormEvent( "javax.swing.event.TreeExpansionListener", "treeExpanded", "fileTreeTreeExpanded", true ) )
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "Center"
