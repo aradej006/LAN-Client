@@ -59,6 +59,7 @@ public class Client implements Runnable {
             output.close();
             input.close();
             socket.close();
+            LOGGER.log(Level.INFO, "Client: Closed all sockets properly.");
         } catch (IOException e) {
             LOGGER.log(Level.INFO, "Client: Error closing client {0} ", name);
         } finally {
@@ -81,6 +82,7 @@ public class Client implements Runnable {
         while (handle(receive()));
         LOGGER.log(Level.INFO, "Client: Received logout.", name);
         this.close();
+        LOGGER.log(Level.INFO, "Client: Thread end.", name);
     }
 
     private synchronized boolean handle(Object data){
@@ -119,13 +121,14 @@ public class Client implements Runnable {
     }
 
     public synchronized void forceLogout() {
-        if (socket != null)
+        if (socket != null) {
             try {
                 LOGGER.log(Level.INFO, "Client: {0} sending logout.", name);
                 output.writeObject(null);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
     }
 
     public synchronized boolean login(String login, String password){

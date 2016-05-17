@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_66" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -9,39 +9,85 @@ new FormModel {
 				name: "saveBtn"
 				"text": "Save"
 				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "saveBtnActionPerformed", true ) )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "South"
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "panel1"
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label1"
-					"text": "IP address"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel3"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "panel4"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "ipAddresLbl"
+							"text": "IP address"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "portLbl"
+							"text": "Port"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "West"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "panel5"
+						add( new FormComponent( "javax.swing.JTextField" ) {
+							name: "ipAddressField"
+							"preferredSize": &Dimension0 new java.awt.Dimension( 200, 31 )
+						} )
+						add( new FormComponent( "javax.swing.JTextField" ) {
+							name: "portField"
+							"text": "10000"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
 				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "North"
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label2"
-					"text": "Port"
-				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "South"
+					"value": "West"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "West"
+				"value": "Center"
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "panel2"
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "ipAddressField"
-					"preferredSize": new java.awt.Dimension( 200, 31 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "panel6"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "panel7"
+						add( new FormComponent( "javax.swing.JTextField" ) {
+							name: "loginField"
+							"preferredSize": #Dimension0
+						} )
+						add( new FormComponent( "javax.swing.JPasswordField" ) {
+							name: "jPasswordField"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "panel8"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "loginLbl"
+							"text": "Login"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "passwordLbl"
+							"text": "Password"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "West"
+					} )
 				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "North"
-				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "portField"
-					"text": "10000"
-				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "South"
+					"value": "Center"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "East"

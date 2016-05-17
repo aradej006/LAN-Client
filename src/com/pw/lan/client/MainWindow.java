@@ -4,11 +4,14 @@
 
 package com.pw.lan.client;
 
+import javax.swing.border.*;
 import javax.swing.event.*;
 import com.pw.lan.client.client.Client;
+import com.pw.lan.client.tree.FileMutableTreeNode;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
@@ -32,41 +35,54 @@ public class MainWindow extends JFrame {
     public MainWindow() {
         super("LAN Client App");
         initComponents();
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
         expandingFilesTree = false;
+
+        DefaultTreeModel model = (DefaultTreeModel) fileTree.getModel();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+        root.removeAllChildren();
+        root.setUserObject("root");
+        model.reload(root);
+        fileTree.setEnabled(false);
     }
 
     private void networkMenuActionPerformed(ActionEvent e) {
-        new NetworkWindow(this, "network");
+        new NetworkWindow(this);
     }
 
     private void connectBtnActionPerformed(ActionEvent e) {
         if(connectBtn.getText().equals("Connect")){
             try {
+                connectBtn.setText("Connecting...");
                 client = new Client(ipAddress, port);
                 client.setMainWindow(this);
                 connectBtn.setText("Disconnect");
                 loginBtn.setEnabled(true);
+                statusLbl.setText("Connected, Not Logged In");
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
         }else{
             client.forceLogout();
             client = null;
-            connectBtn.setText("Connect");
+            connectBtn.setText("Connected");
+            statusLbl.setText("Disconnected");
             loginBtn.setEnabled(false);
+            fileTree.setEnabled(false);
         }
     }
 
     private void loginBtnActionPerformed(ActionEvent e) {
+        statusLbl.setText("Connected, Logging In...");
         if(client.login(login,password)){
             loginBtn.setEnabled(false);
+            statusLbl.setText("Connected, Log In");
         }
     }
 
     private void credentialsActionPerformed(ActionEvent e) {
-        new NetworkWindow(this, "credentials");
+        new NetworkWindow(this);
     }
 
     public void updateFilesTree(String filesPath, Map<String,String> files){
@@ -93,12 +109,16 @@ public class MainWindow extends JFrame {
             DefaultMutableTreeNode n = new DefaultMutableTreeNode(key);
             if(files.get(key).split(" ")[0].equals("dir")){
                 n.add(new DefaultMutableTreeNode("<items>"));
+            }else{
+                n = new FileMutableTreeNode(key,files.get(key).split(" ")[0],Long.parseLong(files.get(key).split(" ")[1]));
             }
             node.add(n);
         }
         model.reload(root);
         fileTree.expandPath(new TreePath(node.getPath()));
         expandingFilesTree = false;
+        actionLbl.setText("Fetched");
+        fileTree.setEnabled(true);
     }
 
     private void button2ActionPerformed(ActionEvent e) {
@@ -124,7 +144,22 @@ public class MainWindow extends JFrame {
             String filesPath = e.getPath().toString().substring(1,e.getPath().toString().length()-1).replace(", ","/") + "/";
             client.getFiles(filesPath);
             expandingFilesTree = true;
+            actionLbl.setText("Fetching...");
         }
+    }
+
+    private void fileTreeValueChanged(TreeSelectionEvent e) {
+        if(fileTree.getLastSelectedPathComponent() instanceof FileMutableTreeNode){
+            FileMutableTreeNode node = (FileMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            nameLbl.setText(node.getName());
+            extensionLbl.setText(node.getExtension());
+            sizeLbl.setText(node.getSize());
+        }
+    }
+
+    private void thisWindowClosing(WindowEvent e) {
+        if(client!=null)
+            client.forceLogout();
     }
 
     private void initComponents() {
@@ -133,23 +168,32 @@ public class MainWindow extends JFrame {
         menuBar1 = new JMenuBar();
         optionsMenu = new JMenu();
         networkMenu = new JMenuItem();
-        credentials = new JMenuItem();
-        panel2 = new JPanel();
+        buttonsPanel = new JPanel();
         panel5 = new JPanel();
         connectBtn = new JButton();
         loginBtn = new JButton();
         scrollPane1 = new JScrollPane();
         fileTree = new JTree();
         propPanel = new JPanel();
-        label1 = new JLabel();
-        panel3 = new JPanel();
-        panel4 = new JPanel();
-        button2 = new JButton();
+        propNamesPanel = new JPanel();
+        label8 = new JLabel();
+        label9 = new JLabel();
+        label10 = new JLabel();
+        propValuesPanel = new JPanel();
+        nameLbl = new JLabel();
+        extensionLbl = new JLabel();
+        sizeLbl = new JLabel();
         infoPanel = new JPanel();
         actionLbl = new JLabel();
         statusLbl = new JLabel();
 
         //======== this ========
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                thisWindowClosing(e);
+            }
+        });
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 
@@ -164,27 +208,22 @@ public class MainWindow extends JFrame {
                 networkMenu.setText("Network");
                 networkMenu.addActionListener(e -> networkMenuActionPerformed(e));
                 optionsMenu.add(networkMenu);
-
-                //---- credentials ----
-                credentials.setText("Credentials");
-                credentials.addActionListener(e -> credentialsActionPerformed(e));
-                optionsMenu.add(credentials);
             }
             menuBar1.add(optionsMenu);
         }
         setJMenuBar(menuBar1);
 
-        //======== panel2 ========
+        //======== buttonsPanel ========
         {
 
             // JFormDesigner evaluation mark
-            panel2.setBorder(new javax.swing.border.CompoundBorder(
+            buttonsPanel.setBorder(new javax.swing.border.CompoundBorder(
                 new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
                     "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
                     javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
-                    java.awt.Color.red), panel2.getBorder())); panel2.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
+                    java.awt.Color.red), buttonsPanel.getBorder())); buttonsPanel.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
-            panel2.setLayout(new BorderLayout());
+            buttonsPanel.setLayout(new BorderLayout());
 
             //======== panel5 ========
             {
@@ -201,14 +240,17 @@ public class MainWindow extends JFrame {
                 loginBtn.addActionListener(e -> loginBtnActionPerformed(e));
                 panel5.add(loginBtn, BorderLayout.EAST);
             }
-            panel2.add(panel5, BorderLayout.WEST);
+            buttonsPanel.add(panel5, BorderLayout.WEST);
         }
-        contentPane.add(panel2, BorderLayout.NORTH);
+        contentPane.add(buttonsPanel, BorderLayout.NORTH);
 
         //======== scrollPane1 ========
         {
 
             //---- fileTree ----
+            fileTree.setMinimumSize(new Dimension(200, 0));
+            fileTree.setBorder(new TitledBorder("File Tree"));
+            fileTree.setPreferredSize(new Dimension(200, 72));
             fileTree.addTreeExpansionListener(new TreeExpansionListener() {
                 @Override
                 public void treeCollapsed(TreeExpansionEvent e) {}
@@ -217,47 +259,53 @@ public class MainWindow extends JFrame {
                     fileTreeTreeExpanded(e);
                 }
             });
+            fileTree.addTreeSelectionListener(e -> fileTreeValueChanged(e));
             scrollPane1.setViewportView(fileTree);
         }
         contentPane.add(scrollPane1, BorderLayout.CENTER);
 
         //======== propPanel ========
         {
+            propPanel.setPreferredSize(new Dimension(200, 64));
+            propPanel.setBorder(new TitledBorder("File Properties"));
             propPanel.setLayout(new BorderLayout());
 
-            //---- label1 ----
-            label1.setText("Properties");
-            propPanel.add(label1, BorderLayout.NORTH);
-
-            //======== panel3 ========
+            //======== propNamesPanel ========
             {
-                panel3.setLayout(new BorderLayout());
-            }
-            propPanel.add(panel3, BorderLayout.WEST);
+                propNamesPanel.setLayout(new BoxLayout(propNamesPanel, BoxLayout.Y_AXIS));
 
-            //======== panel4 ========
+                //---- label8 ----
+                label8.setText("Name");
+                propNamesPanel.add(label8);
+
+                //---- label9 ----
+                label9.setText("Extension");
+                propNamesPanel.add(label9);
+
+                //---- label10 ----
+                label10.setText("Size");
+                propNamesPanel.add(label10);
+            }
+            propPanel.add(propNamesPanel, BorderLayout.WEST);
+
+            //======== propValuesPanel ========
             {
-                panel4.setLayout(new BorderLayout());
+                propValuesPanel.setLayout(new BoxLayout(propValuesPanel, BoxLayout.Y_AXIS));
+                propValuesPanel.add(nameLbl);
+                propValuesPanel.add(extensionLbl);
+                propValuesPanel.add(sizeLbl);
             }
-            propPanel.add(panel4, BorderLayout.EAST);
-
-            //---- button2 ----
-            button2.setText("text");
-            button2.addActionListener(e -> button2ActionPerformed(e));
-            propPanel.add(button2, BorderLayout.SOUTH);
+            propPanel.add(propValuesPanel, BorderLayout.EAST);
         }
         contentPane.add(propPanel, BorderLayout.EAST);
 
         //======== infoPanel ========
         {
             infoPanel.setLayout(new BorderLayout());
-
-            //---- actionLbl ----
-            actionLbl.setText("Action");
             infoPanel.add(actionLbl, BorderLayout.EAST);
 
             //---- statusLbl ----
-            statusLbl.setText("Status");
+            statusLbl.setText("Disconnected");
             infoPanel.add(statusLbl, BorderLayout.WEST);
         }
         contentPane.add(infoPanel, BorderLayout.SOUTH);
@@ -287,18 +335,21 @@ public class MainWindow extends JFrame {
     private JMenuBar menuBar1;
     private JMenu optionsMenu;
     private JMenuItem networkMenu;
-    private JMenuItem credentials;
-    private JPanel panel2;
+    private JPanel buttonsPanel;
     private JPanel panel5;
     private JButton connectBtn;
     private JButton loginBtn;
     private JScrollPane scrollPane1;
     private JTree fileTree;
     private JPanel propPanel;
-    private JLabel label1;
-    private JPanel panel3;
-    private JPanel panel4;
-    private JButton button2;
+    private JPanel propNamesPanel;
+    private JLabel label8;
+    private JLabel label9;
+    private JLabel label10;
+    private JPanel propValuesPanel;
+    private JLabel nameLbl;
+    private JLabel extensionLbl;
+    private JLabel sizeLbl;
     private JPanel infoPanel;
     private JLabel actionLbl;
     private JLabel statusLbl;
