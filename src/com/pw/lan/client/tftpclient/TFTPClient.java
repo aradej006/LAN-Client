@@ -208,7 +208,6 @@ public class TFTPClient extends Thread {
 		Boolean success;
 
 		for (int i=0;i<dirs.length-1;i++){
-
 			temporary += dirs[i] +"/";
 			File directory = new File(direct + temporary);
 			if (!directory.exists()){

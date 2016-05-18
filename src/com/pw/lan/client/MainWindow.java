@@ -238,7 +238,6 @@ public class MainWindow extends JFrame {
             TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
             String pathToFile = currentPathLbl.getText();
             String[] temp = pathToUploadFile.split("/");
-
             tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1]);
         }
     }
