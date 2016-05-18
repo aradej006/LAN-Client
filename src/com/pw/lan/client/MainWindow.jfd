@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_66" encoding: "UTF-8"
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -6,43 +6,56 @@ new FormModel {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 			name: "this"
 			addEvent( new FormEvent( "java.awt.event.WindowListener", "windowClosing", "thisWindowClosing", true ) )
+			addEvent( new FormEvent( "java.awt.event.WindowFocusListener", "windowGainedFocus", "thisWindowGainedFocus", true ) )
+			addEvent( new FormEvent( "java.awt.event.WindowListener", "windowActivated", "thisWindowActivated", true ) )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "buttonsPanel"
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 					name: "panel5"
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "connectBtn"
-						"text": "Connect"
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+						name: "currentPathPane"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "currentPathDescLbl"
+							"text": "Current Path: "
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "West"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "currentPathLbl"
+							"text": "root/"
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "East"
+						} )
 					}, new FormLayoutConstraints( class java.lang.String ) {
-						"value": "West"
+						"value": "South"
 					} )
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "loginBtn"
-						"text": "Login"
-						"enabled": false
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "loginBtnActionPerformed", true ) )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+						name: "buttonsWrapperPane"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) ) {
+							name: "buttonsPane"
+							"componentOrientation": sfield java.awt.ComponentOrientation LEFT_TO_RIGHT
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "connectBtn"
+								"text": "Connect"
+								addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "connectBtnActionPerformed", true ) )
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "loginBtn"
+								"text": "Login"
+								"enabled": false
+								addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "loginBtnActionPerformed", true ) )
+							} )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "West"
+						} )
 					}, new FormLayoutConstraints( class java.lang.String ) {
-						"value": "East"
+						"value": "Center"
 					} )
 				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "West"
+					"value": "Center"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "North"
-			} )
-			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
-				name: "scrollPane1"
-				add( new FormComponent( "javax.swing.JTree" ) {
-					name: "fileTree"
-					"minimumSize": new java.awt.Dimension( 200, 0 )
-					"border": new javax.swing.border.TitledBorder( "File Tree" )
-					"preferredSize": new java.awt.Dimension( 200, 72 )
-					addEvent( new FormEvent( "javax.swing.event.TreeExpansionListener", "treeExpanded", "fileTreeTreeExpanded", true ) )
-					addEvent( new FormEvent( "javax.swing.event.TreeSelectionListener", "valueChanged", "fileTreeValueChanged", true ) )
-				} )
-			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "Center"
+				"value": "First"
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "propPanel"
@@ -83,8 +96,32 @@ new FormModel {
 				}, new FormLayoutConstraints( class java.lang.String ) {
 					"value": "East"
 				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "tftpActionPane"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+						name: "panel2"
+						add( new FormComponent( "javax.swing.JButton" ) {
+							name: "uploadBtn"
+							"text": "Upload"
+							addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "uploadBtnActionPerformed", true ) )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "West"
+						} )
+						add( new FormComponent( "javax.swing.JButton" ) {
+							name: "downloadBtn"
+							"text": "Download"
+							addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "downloadBtnActionPerformed", true ) )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "East"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
+				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "East"
+				"value": "After"
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "infoPanel"
@@ -100,7 +137,27 @@ new FormModel {
 					"value": "West"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
-				"value": "South"
+				"value": "Last"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "treePane"
+				"border": new javax.swing.border.TitledBorder( "Files Tree" )
+				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+					name: "scrollPane1"
+					"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+					add( new FormComponent( "javax.swing.JTree" ) {
+						name: "fileTree"
+						"minimumSize": new java.awt.Dimension( 200, 0 )
+						"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+						"preferredSize": new java.awt.Dimension( 200, 72 )
+						addEvent( new FormEvent( "javax.swing.event.TreeExpansionListener", "treeExpanded", "fileTreeTreeExpanded", true ) )
+						addEvent( new FormEvent( "javax.swing.event.TreeSelectionListener", "valueChanged", "fileTreeValueChanged", true ) )
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
 			} )
 			menuBar: new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
 				name: "menuBar1"

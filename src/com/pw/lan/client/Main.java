@@ -1,5 +1,7 @@
 package com.pw.lan.client;
 
+import com.pw.lan.client.conf.Configuration;
+
 import javax.swing.*;
 
 public class Main {

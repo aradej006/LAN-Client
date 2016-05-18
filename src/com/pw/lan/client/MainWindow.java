@@ -7,12 +7,12 @@ package com.pw.lan.client;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import com.pw.lan.client.client.Client;
+import com.pw.lan.client.client.NetworkInformation;
+import com.pw.lan.client.conf.Configuration;
 import com.pw.lan.client.tree.FileMutableTreeNode;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.swing.*;
@@ -25,19 +25,24 @@ import javax.swing.tree.TreePath;
  */
 public class MainWindow extends JFrame {
 
-    private String ipAddress;
-    private String port;
-    private String login;
-    private String password;
+    private NetworkInformation networkInformation;
     private Client client;
+    private NetworkWindow networkWindow;
     private boolean expandingFilesTree;
+    private boolean networkWindowOpened;
+    private Configuration conf;
 
     public MainWindow() {
         super("LAN Client App");
+
+        conf = new Configuration();
+        conf.readConfiguration();
+        networkInformation = conf.getNetworkInformation();
         initComponents();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
         expandingFilesTree = false;
+        networkWindowOpened = false;
 
         DefaultTreeModel model = (DefaultTreeModel) fileTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
@@ -45,17 +50,38 @@ public class MainWindow extends JFrame {
         root.setUserObject("root");
         model.reload(root);
         fileTree.setEnabled(false);
+        downloadBtn.setEnabled(false);
+        uploadBtn.setEnabled(false);
+        connectBtn.setEnabled(false);
     }
 
     private void networkMenuActionPerformed(ActionEvent e) {
-        new NetworkWindow(this);
+        networkWindowOpened = true;
+        this.setEnabled(false);
+        this.setFocusable(false);
+        networkWindow = new NetworkWindow(this);
+    }
+
+    public void setNetworkWindowOpened(boolean networkWindowOpened) {
+        this.networkWindowOpened = networkWindowOpened;
+    }
+
+    public NetworkInformation getNetworkInformation() {
+        return networkInformation;
+    }
+
+    public void setNetworkInformation(NetworkInformation networkInformation) {
+        this.networkInformation = networkInformation;
+        if(networkInformation.isReady()){
+            connectBtn.setEnabled(true);
+        }
     }
 
     private void connectBtnActionPerformed(ActionEvent e) {
         if(connectBtn.getText().equals("Connect")){
             try {
                 connectBtn.setText("Connecting...");
-                client = new Client(ipAddress, port);
+                client = new Client(networkInformation.getIpAddress(), networkInformation.getPort());
                 client.setMainWindow(this);
                 connectBtn.setText("Disconnect");
                 loginBtn.setEnabled(true);
@@ -66,7 +92,7 @@ public class MainWindow extends JFrame {
         }else{
             client.forceLogout();
             client = null;
-            connectBtn.setText("Connected");
+            connectBtn.setText("Connect");
             statusLbl.setText("Disconnected");
             loginBtn.setEnabled(false);
             fileTree.setEnabled(false);
@@ -75,14 +101,10 @@ public class MainWindow extends JFrame {
 
     private void loginBtnActionPerformed(ActionEvent e) {
         statusLbl.setText("Connected, Logging In...");
-        if(client.login(login,password)){
+        if(client.login(networkInformation.getLogin(),networkInformation.getPassword())){
             loginBtn.setEnabled(false);
             statusLbl.setText("Connected, Log In");
         }
-    }
-
-    private void credentialsActionPerformed(ActionEvent e) {
-        new NetworkWindow(this);
     }
 
     public void updateFilesTree(String filesPath, Map<String,String> files){
@@ -121,24 +143,6 @@ public class MainWindow extends JFrame {
         fileTree.setEnabled(true);
     }
 
-    private void button2ActionPerformed(ActionEvent e) {
-        DefaultTreeModel model = (DefaultTreeModel) fileTree.getModel();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-        root.setUserObject("root");
-        root.removeAllChildren();
-        DefaultMutableTreeNode node1 = new DefaultMutableTreeNode("folder1");
-        DefaultMutableTreeNode node2 = new DefaultMutableTreeNode("folder2");
-        DefaultMutableTreeNode node3 = new DefaultMutableTreeNode("file1");
-        DefaultMutableTreeNode node4 = new DefaultMutableTreeNode("file2");
-        DefaultMutableTreeNode node5 = new DefaultMutableTreeNode("file3");
-        root.add(node1);
-        root.add(node2);
-        root.add(node5);
-        node1.add(node3);
-        node1.add(node4);
-        model.reload(root);
-    }
-
     private void fileTreeTreeExpanded(TreeExpansionEvent e) {
         if( !expandingFilesTree ){
             String filesPath = e.getPath().toString().substring(1,e.getPath().toString().length()-1).replace(", ","/") + "/";
@@ -154,12 +158,40 @@ public class MainWindow extends JFrame {
             nameLbl.setText(node.getName());
             extensionLbl.setText(node.getExtension());
             sizeLbl.setText(node.getSize());
+            downloadBtn.setEnabled(true);
+            uploadBtn.setEnabled(false);
+        }else{
+            nameLbl.setText("");
+            extensionLbl.setText("");
+            sizeLbl.setText("");
+            downloadBtn.setEnabled(false);
+            uploadBtn.setEnabled(true);
         }
+        String filesPath = e.getPath().toString().substring(1,e.getPath().toString().length()-1).replace(", ","/");
+        currentPathLbl.setText(filesPath);
+
     }
 
     private void thisWindowClosing(WindowEvent e) {
         if(client!=null)
             client.forceLogout();
+        conf.setNetworkInformation(networkInformation);
+        conf.saveConfiguration();
+    }
+
+    private void thisWindowGainedFocus(WindowEvent e) {
+    }
+
+    private void thisWindowActivated(WindowEvent e) {
+    }
+
+    private void downloadBtnActionPerformed(ActionEvent e) {
+        String pathToFile = currentPathLbl.getText();
+        //TODO add your code to download file
+    }
+
+    private void uploadBtnActionPerformed(ActionEvent e) {
+        // TODO add your code to upload file
     }
 
     private void initComponents() {
@@ -170,10 +202,13 @@ public class MainWindow extends JFrame {
         networkMenu = new JMenuItem();
         buttonsPanel = new JPanel();
         panel5 = new JPanel();
+        currentPathPane = new JPanel();
+        currentPathDescLbl = new JLabel();
+        currentPathLbl = new JLabel();
+        buttonsWrapperPane = new JPanel();
+        buttonsPane = new JPanel();
         connectBtn = new JButton();
         loginBtn = new JButton();
-        scrollPane1 = new JScrollPane();
-        fileTree = new JTree();
         propPanel = new JPanel();
         propNamesPanel = new JPanel();
         label8 = new JLabel();
@@ -183,15 +218,32 @@ public class MainWindow extends JFrame {
         nameLbl = new JLabel();
         extensionLbl = new JLabel();
         sizeLbl = new JLabel();
+        tftpActionPane = new JPanel();
+        panel2 = new JPanel();
+        uploadBtn = new JButton();
+        downloadBtn = new JButton();
         infoPanel = new JPanel();
         actionLbl = new JLabel();
         statusLbl = new JLabel();
+        treePane = new JPanel();
+        scrollPane1 = new JScrollPane();
+        fileTree = new JTree();
 
         //======== this ========
         addWindowListener(new WindowAdapter() {
             @Override
+            public void windowActivated(WindowEvent e) {
+                thisWindowActivated(e);
+            }
+            @Override
             public void windowClosing(WindowEvent e) {
                 thisWindowClosing(e);
+            }
+        });
+        addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                thisWindowGainedFocus(e);
             }
         });
         Container contentPane = getContentPane();
@@ -229,40 +281,47 @@ public class MainWindow extends JFrame {
             {
                 panel5.setLayout(new BorderLayout());
 
-                //---- connectBtn ----
-                connectBtn.setText("Connect");
-                connectBtn.addActionListener(e -> connectBtnActionPerformed(e));
-                panel5.add(connectBtn, BorderLayout.WEST);
+                //======== currentPathPane ========
+                {
+                    currentPathPane.setLayout(new BorderLayout());
 
-                //---- loginBtn ----
-                loginBtn.setText("Login");
-                loginBtn.setEnabled(false);
-                loginBtn.addActionListener(e -> loginBtnActionPerformed(e));
-                panel5.add(loginBtn, BorderLayout.EAST);
-            }
-            buttonsPanel.add(panel5, BorderLayout.WEST);
-        }
-        contentPane.add(buttonsPanel, BorderLayout.NORTH);
+                    //---- currentPathDescLbl ----
+                    currentPathDescLbl.setText("Current Path: ");
+                    currentPathPane.add(currentPathDescLbl, BorderLayout.WEST);
 
-        //======== scrollPane1 ========
-        {
-
-            //---- fileTree ----
-            fileTree.setMinimumSize(new Dimension(200, 0));
-            fileTree.setBorder(new TitledBorder("File Tree"));
-            fileTree.setPreferredSize(new Dimension(200, 72));
-            fileTree.addTreeExpansionListener(new TreeExpansionListener() {
-                @Override
-                public void treeCollapsed(TreeExpansionEvent e) {}
-                @Override
-                public void treeExpanded(TreeExpansionEvent e) {
-                    fileTreeTreeExpanded(e);
+                    //---- currentPathLbl ----
+                    currentPathLbl.setText("root/");
+                    currentPathPane.add(currentPathLbl, BorderLayout.EAST);
                 }
-            });
-            fileTree.addTreeSelectionListener(e -> fileTreeValueChanged(e));
-            scrollPane1.setViewportView(fileTree);
+                panel5.add(currentPathPane, BorderLayout.SOUTH);
+
+                //======== buttonsWrapperPane ========
+                {
+                    buttonsWrapperPane.setLayout(new BorderLayout());
+
+                    //======== buttonsPane ========
+                    {
+                        buttonsPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+                        buttonsPane.setLayout(new FlowLayout());
+
+                        //---- connectBtn ----
+                        connectBtn.setText("Connect");
+                        connectBtn.addActionListener(e -> connectBtnActionPerformed(e));
+                        buttonsPane.add(connectBtn);
+
+                        //---- loginBtn ----
+                        loginBtn.setText("Login");
+                        loginBtn.setEnabled(false);
+                        loginBtn.addActionListener(e -> loginBtnActionPerformed(e));
+                        buttonsPane.add(loginBtn);
+                    }
+                    buttonsWrapperPane.add(buttonsPane, BorderLayout.WEST);
+                }
+                panel5.add(buttonsWrapperPane, BorderLayout.CENTER);
+            }
+            buttonsPanel.add(panel5, BorderLayout.CENTER);
         }
-        contentPane.add(scrollPane1, BorderLayout.CENTER);
+        contentPane.add(buttonsPanel, BorderLayout.PAGE_START);
 
         //======== propPanel ========
         {
@@ -296,8 +355,30 @@ public class MainWindow extends JFrame {
                 propValuesPanel.add(sizeLbl);
             }
             propPanel.add(propValuesPanel, BorderLayout.EAST);
+
+            //======== tftpActionPane ========
+            {
+                tftpActionPane.setLayout(new BorderLayout());
+
+                //======== panel2 ========
+                {
+                    panel2.setLayout(new BorderLayout());
+
+                    //---- uploadBtn ----
+                    uploadBtn.setText("Upload");
+                    uploadBtn.addActionListener(e -> uploadBtnActionPerformed(e));
+                    panel2.add(uploadBtn, BorderLayout.WEST);
+
+                    //---- downloadBtn ----
+                    downloadBtn.setText("Download");
+                    downloadBtn.addActionListener(e -> downloadBtnActionPerformed(e));
+                    panel2.add(downloadBtn, BorderLayout.EAST);
+                }
+                tftpActionPane.add(panel2, BorderLayout.EAST);
+            }
+            propPanel.add(tftpActionPane, BorderLayout.SOUTH);
         }
-        contentPane.add(propPanel, BorderLayout.EAST);
+        contentPane.add(propPanel, BorderLayout.LINE_END);
 
         //======== infoPanel ========
         {
@@ -308,27 +389,40 @@ public class MainWindow extends JFrame {
             statusLbl.setText("Disconnected");
             infoPanel.add(statusLbl, BorderLayout.WEST);
         }
-        contentPane.add(infoPanel, BorderLayout.SOUTH);
+        contentPane.add(infoPanel, BorderLayout.PAGE_END);
+
+        //======== treePane ========
+        {
+            treePane.setBorder(new TitledBorder("Files Tree"));
+            treePane.setLayout(new BorderLayout());
+
+            //======== scrollPane1 ========
+            {
+                scrollPane1.setBorder(null);
+
+                //---- fileTree ----
+                fileTree.setMinimumSize(new Dimension(200, 0));
+                fileTree.setBorder(null);
+                fileTree.setPreferredSize(new Dimension(200, 72));
+                fileTree.addTreeExpansionListener(new TreeExpansionListener() {
+                    @Override
+                    public void treeCollapsed(TreeExpansionEvent e) {}
+                    @Override
+                    public void treeExpanded(TreeExpansionEvent e) {
+                        fileTreeTreeExpanded(e);
+                    }
+                });
+                fileTree.addTreeSelectionListener(e -> fileTreeValueChanged(e));
+                scrollPane1.setViewportView(fileTree);
+            }
+            treePane.add(scrollPane1, BorderLayout.CENTER);
+        }
+        contentPane.add(treePane, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
-    public void setPort(String port) {
-        this.port = port;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - Adrian Radej
@@ -337,10 +431,13 @@ public class MainWindow extends JFrame {
     private JMenuItem networkMenu;
     private JPanel buttonsPanel;
     private JPanel panel5;
+    private JPanel currentPathPane;
+    private JLabel currentPathDescLbl;
+    private JLabel currentPathLbl;
+    private JPanel buttonsWrapperPane;
+    private JPanel buttonsPane;
     private JButton connectBtn;
     private JButton loginBtn;
-    private JScrollPane scrollPane1;
-    private JTree fileTree;
     private JPanel propPanel;
     private JPanel propNamesPanel;
     private JLabel label8;
@@ -350,8 +447,15 @@ public class MainWindow extends JFrame {
     private JLabel nameLbl;
     private JLabel extensionLbl;
     private JLabel sizeLbl;
+    private JPanel tftpActionPane;
+    private JPanel panel2;
+    private JButton uploadBtn;
+    private JButton downloadBtn;
     private JPanel infoPanel;
     private JLabel actionLbl;
     private JLabel statusLbl;
+    private JPanel treePane;
+    private JScrollPane scrollPane1;
+    private JTree fileTree;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
