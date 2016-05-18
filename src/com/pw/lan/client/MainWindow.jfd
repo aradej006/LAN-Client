@@ -120,6 +120,39 @@ new FormModel {
 				}, new FormLayoutConstraints( class java.lang.String ) {
 					"value": "South"
 				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "directoryPropPane"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "directoryPropsActionPanel"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "directoryDescLbl"
+							"text": "Directory"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "permissionDescLbl"
+							"text": "Permission"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "West"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "directoryPropsValuePanel"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "directoryLbl"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "permissionLbl"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "North"
+				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "After"
 			} )

@@ -9,6 +9,7 @@ import javax.swing.event.*;
 import com.pw.lan.client.client.Client;
 import com.pw.lan.client.client.NetworkInformation;
 import com.pw.lan.client.conf.Configuration;
+import com.pw.lan.client.tree.DirectoryMutableTreeNode;
 import com.pw.lan.client.tree.FileMutableTreeNode;
 
 import java.awt.*;
@@ -133,11 +134,13 @@ public class MainWindow extends JFrame {
             }
         }
         for (String key : files.keySet()) {
-            DefaultMutableTreeNode n = new DefaultMutableTreeNode(key);
-            if(files.get(key).split(" ")[0].equals("dir")){
+            DefaultMutableTreeNode n;
+            String[] splitValue = files.get(key).split(" ");
+            if(splitValue[0].equals("dir")){
+                n = new DirectoryMutableTreeNode(key, Boolean.parseBoolean(splitValue[1]),Boolean.parseBoolean(splitValue[2]));
                 n.add(new DefaultMutableTreeNode("<items>"));
             }else{
-                n = new FileMutableTreeNode(key,files.get(key).split(" ")[0],Long.parseLong(files.get(key).split(" ")[1]));
+                n = new FileMutableTreeNode(key,splitValue[0],Long.parseLong(splitValue[1]));
             }
             node.add(n);
         }
@@ -163,9 +166,14 @@ public class MainWindow extends JFrame {
             nameLbl.setText(node.getName());
             extensionLbl.setText(node.getExtension());
             sizeLbl.setText(node.getSize());
+            directoryLbl.setText("");
+            permissionLbl.setText("");
             downloadBtn.setEnabled(true);
             uploadBtn.setEnabled(false);
-        }else{
+        }else if( fileTree.getLastSelectedPathComponent() instanceof DirectoryMutableTreeNode){
+            DirectoryMutableTreeNode node = (DirectoryMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            directoryLbl.setText(node.getUserObject().toString());
+            permissionLbl.setText(node.getPermissions());
             nameLbl.setText("");
             extensionLbl.setText("");
             sizeLbl.setText("");
@@ -227,6 +235,13 @@ public class MainWindow extends JFrame {
         panel2 = new JPanel();
         uploadBtn = new JButton();
         downloadBtn = new JButton();
+        directoryPropPane = new JPanel();
+        directoryPropsActionPanel = new JPanel();
+        directoryDescLbl = new JLabel();
+        permissionDescLbl = new JLabel();
+        directoryPropsValuePanel = new JPanel();
+        directoryLbl = new JLabel();
+        permissionLbl = new JLabel();
         infoPanel = new JPanel();
         actionLbl = new JLabel();
         statusLbl = new JLabel();
@@ -382,6 +397,34 @@ public class MainWindow extends JFrame {
                 tftpActionPane.add(panel2, BorderLayout.EAST);
             }
             propPanel.add(tftpActionPane, BorderLayout.SOUTH);
+
+            //======== directoryPropPane ========
+            {
+                directoryPropPane.setLayout(new BorderLayout());
+
+                //======== directoryPropsActionPanel ========
+                {
+                    directoryPropsActionPanel.setLayout(new BoxLayout(directoryPropsActionPanel, BoxLayout.Y_AXIS));
+
+                    //---- directoryDescLbl ----
+                    directoryDescLbl.setText("Directory");
+                    directoryPropsActionPanel.add(directoryDescLbl);
+
+                    //---- permissionDescLbl ----
+                    permissionDescLbl.setText("Permission");
+                    directoryPropsActionPanel.add(permissionDescLbl);
+                }
+                directoryPropPane.add(directoryPropsActionPanel, BorderLayout.WEST);
+
+                //======== directoryPropsValuePanel ========
+                {
+                    directoryPropsValuePanel.setLayout(new BoxLayout(directoryPropsValuePanel, BoxLayout.Y_AXIS));
+                    directoryPropsValuePanel.add(directoryLbl);
+                    directoryPropsValuePanel.add(permissionLbl);
+                }
+                directoryPropPane.add(directoryPropsValuePanel, BorderLayout.EAST);
+            }
+            propPanel.add(directoryPropPane, BorderLayout.NORTH);
         }
         contentPane.add(propPanel, BorderLayout.LINE_END);
 
@@ -456,6 +499,13 @@ public class MainWindow extends JFrame {
     private JPanel panel2;
     private JButton uploadBtn;
     private JButton downloadBtn;
+    private JPanel directoryPropPane;
+    private JPanel directoryPropsActionPanel;
+    private JLabel directoryDescLbl;
+    private JLabel permissionDescLbl;
+    private JPanel directoryPropsValuePanel;
+    private JLabel directoryLbl;
+    private JLabel permissionLbl;
     private JPanel infoPanel;
     private JLabel actionLbl;
     private JLabel statusLbl;
