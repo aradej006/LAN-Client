@@ -95,11 +95,17 @@ public class Client implements Runnable {
                 if(msgs.get(Msg.TYPE).toString().equals(Msg.DO_LOGIN)){
                     //do something
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)){
-                    loggedIn = true;
-                    this.notify();
-                    msgs = new HashMap<>();
-                    msgs.put(Msg.TYPE, Msg.GETFILES);
-                    send(msgs);
+                    if(msgs.get(Msg.LOGINMSG).toString().equals(Msg.LOGINCONFIRMED)){
+                        loggedIn = true;
+                        this.notify();
+                        msgs = new HashMap<>();
+                        msgs.put(Msg.TYPE, Msg.GETFILES);
+                        send(msgs);
+                    } else {
+                        loggedIn = false;
+                        this.notify();
+                    }
+
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.FILES)){
                     mainWindow.updateFilesTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
                 }

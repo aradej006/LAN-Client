@@ -34,10 +34,6 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         super("LAN Client App");
-
-        conf = new Configuration();
-        conf.readConfiguration();
-        networkInformation = conf.getNetworkInformation();
         initComponents();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
@@ -53,6 +49,10 @@ public class MainWindow extends JFrame {
         downloadBtn.setEnabled(false);
         uploadBtn.setEnabled(false);
         connectBtn.setEnabled(false);
+
+        conf = new Configuration();
+        conf.readConfiguration();
+        setNetworkInformation(conf.getNetworkInformation());
     }
 
     private void networkMenuActionPerformed(ActionEvent e) {
@@ -87,6 +87,8 @@ public class MainWindow extends JFrame {
                 loginBtn.setEnabled(true);
                 statusLbl.setText("Connected, Not Logged In");
             } catch (Exception e1) {
+                JOptionPane.showConfirmDialog(this,e1.getMessage(),"Connection Error!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                connectBtn.setText("Connect");
                 e1.printStackTrace();
             }
         }else{
@@ -104,6 +106,9 @@ public class MainWindow extends JFrame {
         if(client.login(networkInformation.getLogin(),networkInformation.getPassword())){
             loginBtn.setEnabled(false);
             statusLbl.setText("Connected, Log In");
+        }else{
+            statusLbl.setText("Connected, Not Logged In");
+            JOptionPane.showConfirmDialog(this, "Incorrect Login or Password!","Error! Incorrect login data!",JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
         }
     }
 

@@ -12,8 +12,8 @@ public class Configuration {
     private static final String CONFFILENAME = "conf.txt";
     private NetworkInformation networkInformation;
 
-    public void readConfiguration(){
-        try(BufferedReader br = new BufferedReader(new FileReader(CONFFILENAME))) {
+    public void readConfiguration() {
+        try (BufferedReader br = new BufferedReader(new FileReader(CONFFILENAME))) {
             String line = br.readLine();
             networkInformation = new NetworkInformation();
             networkInformation.setIpAddress(line.split(" ")[1]);
@@ -30,19 +30,18 @@ public class Configuration {
         }
     }
 
-    public void saveConfiguration(){
+    public void saveConfiguration() {
         File fout = new File(CONFFILENAME);
         BufferedWriter bw;
         try (FileOutputStream fos = new FileOutputStream(fout)) {
-            bw = new BufferedWriter(new OutputStreamWriter(fos));for (int i = 0; i < 10; i++) {
-                bw.write("network " + networkInformation.getIpAddress());
-                bw.newLine();
-                bw.write("port " + networkInformation.getPort());
-                bw.newLine();
-                bw.write("login " + networkInformation.getLogin());
-                bw.newLine();
-                bw.write("password " + networkInformation.getPassword());
-            }
+            bw = new BufferedWriter(new OutputStreamWriter(fos));
+            bw.write("network " + networkInformation.getIpAddress());
+            bw.newLine();
+            bw.write("port " + networkInformation.getPort());
+            bw.newLine();
+            bw.write("login " + networkInformation.getLogin());
+            bw.newLine();
+            bw.write("password " + networkInformation.getPassword());
             bw.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();

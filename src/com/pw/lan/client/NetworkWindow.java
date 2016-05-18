@@ -44,8 +44,12 @@ public class NetworkWindow extends JFrame {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(new String(jPasswordField.getPassword()).getBytes("UTF-8"));
             String password = String.format("%064x", new java.math.BigInteger(1, md.digest()));
+            if(networkInformation.getPassword().equals(new String(jPasswordField.getPassword()))){
+                mainWindow.setNetworkInformation(new NetworkInformation(ipAddressField.getText(),portField.getText(),loginField.getText(),networkInformation.getPassword()));
+            }else{
+                mainWindow.setNetworkInformation(new NetworkInformation(ipAddressField.getText(),portField.getText(),loginField.getText(),password));
 
-            mainWindow.setNetworkInformation(new NetworkInformation(ipAddressField.getText(),portField.getText(),loginField.getText(),password));
+            }
             this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             mainWindow.setNetworkWindowOpened(false);
             mainWindow.setEnabled(true);
