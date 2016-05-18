@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_66" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -60,42 +60,7 @@ new FormModel {
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 				name: "propPanel"
 				"preferredSize": new java.awt.Dimension( 200, 64 )
-				"border": new javax.swing.border.TitledBorder( "File Properties" )
-				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
-					"axis": 1
-				} ) {
-					name: "propNamesPanel"
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "label8"
-						"text": "Name"
-					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "label9"
-						"text": "Extension"
-					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "label10"
-						"text": "Size"
-					} )
-				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "West"
-				} )
-				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
-					"axis": 1
-				} ) {
-					name: "propValuesPanel"
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "nameLbl"
-					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "extensionLbl"
-					} )
-					add( new FormComponent( "javax.swing.JLabel" ) {
-						name: "sizeLbl"
-					} )
-				}, new FormLayoutConstraints( class java.lang.String ) {
-					"value": "East"
-				} )
+				"border": new javax.swing.border.TitledBorder( "Properties" )
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 					name: "tftpActionPane"
 					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
@@ -122,6 +87,7 @@ new FormModel {
 				} )
 				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 					name: "directoryPropPane"
+					"border": new javax.swing.border.TitledBorder( "Directory" )
 					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
 						"axis": 1
 					} ) {
@@ -153,6 +119,47 @@ new FormModel {
 				}, new FormLayoutConstraints( class java.lang.String ) {
 					"value": "North"
 				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "propFilePane"
+					"border": new javax.swing.border.TitledBorder( "File" )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "propNamesPanel"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label8"
+							"text": "Name"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label9"
+							"text": "Extension"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label10"
+							"text": "Size"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "West"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+						"axis": 1
+					} ) {
+						name: "propValuesPanel"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "nameLbl"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "extensionLbl"
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "sizeLbl"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "East"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "After"
 			} )
@@ -183,6 +190,7 @@ new FormModel {
 						"minimumSize": new java.awt.Dimension( 200, 0 )
 						"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
 						"preferredSize": new java.awt.Dimension( 200, 72 )
+						"foreground": new java.awt.Color( 187, 187, 187, 255 )
 						addEvent( new FormEvent( "javax.swing.event.TreeExpansionListener", "treeExpanded", "fileTreeTreeExpanded", true ) )
 						addEvent( new FormEvent( "javax.swing.event.TreeSelectionListener", "valueChanged", "fileTreeValueChanged", true ) )
 					} )
