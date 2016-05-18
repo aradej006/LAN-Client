@@ -195,12 +195,28 @@ public class TFTPClient extends Thread {
 
 		}
 
-		if (file_exists != null && file_exists.exists()) {
+		/*if (file_exists != null && file_exists.exists()) {
 
 			TFTPUtils.fatalError("Unable to download file to " + dest + ". Destination already exists in " + file_exists.getAbsolutePath());
 			
+		}*/
+
+		String[] temp = dest.split("/root/");
+		String[] dirs = temp[1].split("/");
+		String direct=  System.getProperty("user.dir");
+		String temporary = "/root/";
+		Boolean success;
+
+		for (int i=0;i<dirs.length-1;i++){
+
+			temporary += dirs[i] +"/";
+			File directory = new File(direct + temporary);
+			if (!directory.exists()){
+				success = directory.mkdir();
+				System.out.println(success);
+			}
 		}
-		
+
 		try {
 			
 			fout = new DataOutputStream(new FileOutputStream(dest));

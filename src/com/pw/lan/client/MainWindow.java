@@ -10,14 +10,19 @@ import javax.swing.event.*;
 import com.pw.lan.client.client.Client;
 import com.pw.lan.client.client.NetworkInformation;
 import com.pw.lan.client.conf.Configuration;
+import com.pw.lan.client.tftpclient.TFTPClient;
 import com.pw.lan.client.tree.DirectoryMutableTreeNode;
 import com.pw.lan.client.tree.FileMutableTreeNode;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.swing.*;
+import javax.swing.plaf.FileChooserUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -214,13 +219,28 @@ public class MainWindow extends JFrame {
     private void thisWindowActivated(WindowEvent e) {
     }
 
-    private void downloadBtnActionPerformed(ActionEvent e) {
-        String pathToFile = currentPathLbl.getText();
+    private void downloadBtnActionPerformed(ActionEvent e) throws IOException {
         //TODO add your code to download file
+
+        String directory =  System.getProperty("user.dir");
+        String pathToFile = currentPathLbl.getText();
+        TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
+        tftpClient.getFile(pathToFile, directory + "/" + pathToFile);
     }
 
     private void uploadBtnActionPerformed(ActionEvent e) {
         // TODO add your code to upload file
+        JFileChooser fc = new JFileChooser();
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fc.getSelectedFile();
+            String pathToUploadFile = selectedFile.getAbsolutePath();
+            System.out.println(pathToUploadFile);
+            TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
+            String pathToFile = currentPathLbl.getText();
+            String[] temp = pathToUploadFile.split("/");
+
+            tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1]);
+        }
     }
 
     private void initComponents() {
@@ -381,7 +401,13 @@ public class MainWindow extends JFrame {
 
                     //---- downloadBtn ----
                     downloadBtn.setText("Download");
-                    downloadBtn.addActionListener(e -> downloadBtnActionPerformed(e));
+                    downloadBtn.addActionListener(e -> {
+                        try {
+                            downloadBtnActionPerformed(e);
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    });
                     panel2.add(downloadBtn, BorderLayout.EAST);
                 }
                 tftpActionPane.add(panel2, BorderLayout.EAST);
