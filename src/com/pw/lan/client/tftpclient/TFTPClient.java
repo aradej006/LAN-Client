@@ -6,6 +6,7 @@ import com.pw.lan.client.tftp.TFTPUtils;
 import com.pw.lan.client.tftpserver.TFTPServerClient;
 import com.pw.lan.client.tftpserver.TFTPServerClient.TClientRequest;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -31,17 +32,12 @@ public class TFTPClient extends Thread {
         server_ip = ip;
 
         try {
-
-            server_socket = new Socket(server_ip, server_port);
-
+//            server_socket = new Socket(server_ip, server_port);
+            server_socket = SSLSocketFactory.getDefault().createSocket(server_ip,server_port);
         } catch (UnknownHostException unknownHost) {
-
             TFTPUtils.fatalError("Unknown host  " + server_ip);
-
         } catch (IOException ioException) {
-
             TFTPUtils.fatalError("Unable to create a socket");
-
         }
 
     }
