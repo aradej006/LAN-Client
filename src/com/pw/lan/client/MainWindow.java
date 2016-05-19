@@ -7,10 +7,12 @@ package com.pw.lan.client;
 import javax.swing.border.*;
 import javax.swing.event.*;
 
+import com.globalros.tftp.client.TFTPClient;
+import com.globalros.tftp.common.RRQ;
+import com.globalros.tftp.common.WRQ;
 import com.pw.lan.client.client.Client;
 import com.pw.lan.client.client.NetworkInformation;
 import com.pw.lan.client.conf.Configuration;
-import com.pw.lan.client.tftpclient.TFTPClient;
 import com.pw.lan.client.tree.DirectoryMutableTreeNode;
 import com.pw.lan.client.tree.FileMutableTreeNode;
 
@@ -18,6 +20,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -39,6 +42,7 @@ public class MainWindow extends JFrame {
     private boolean expandingFilesTree;
     private boolean networkWindowOpened;
     private Configuration conf;
+    private String systemSlashChar;
 
     public MainWindow() {
         super("LAN Client App");
@@ -56,6 +60,7 @@ public class MainWindow extends JFrame {
         conf = new Configuration();
         conf.readConfiguration();
         setNetworkInformation(conf.getNetworkInformation());
+        checkOS();
     }
 
     private void resetTree(){
@@ -220,21 +225,68 @@ public class MainWindow extends JFrame {
     private void thisWindowActivated(WindowEvent e) {
     }
 
+    public void checkOS(){
+        String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        if(OS.contains("win"))
+            systemSlashChar = "\\";
+        else
+            systemSlashChar = "/";
+    }
+
     private void downloadBtnActionPerformed(ActionEvent e) {
         new Thread(() -> {
             String directory =  System.getProperty("user.dir");
             String pathToFile = currentPathLbl.getText();
-            TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
-            String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-            FileMutableTreeNode file = (FileMutableTreeNode)fileTree.getLastSelectedPathComponent();
+            FileMutableTreeNode fileFromTree = (FileMutableTreeNode)fileTree.getLastSelectedPathComponent();
+            TFTPClient tftpClient = new TFTPClient("localhost");
+
+            String[] temp;
+            String[] dirs;
+            String direct;
+            String temporary;
+            Boolean success;
+            String dest = directory + systemSlashChar + pathToFile;
+
+            temp = dest.split(systemSlashChar + "root" + systemSlashChar);
+            dirs = temp[1].split(systemSlashChar);
+
+            direct = System.getProperty("user.dir");
+
+            temporary = systemSlashChar + "root" + systemSlashChar;
+
+            for (int i = 0; i < dirs.length - 1; i++) {
+                temporary += dirs[i] + systemSlashChar;
+                File file = new File(direct + temporary);
+                if (!file.exists()) {
+                    success = file.mkdir();
+                    System.out.println(success);
+                }
+            }
+
+            RRQ rrq = null;
+            FileOutputStream file1 = null;
+            try {
+                 file1 = new FileOutputStream(new File(dest));
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+            }
+
             actionLbl.setText("Receiving...");
-            if(OS.contains("win")){
-                System.out.print(directory + "\\" + pathToFile.replace("/", "\\"));
-                tftpClient.getFile(pathToFile, directory + "\\" + pathToFile.replace("/", "\\"),file.getByteSize(),this);
+            try {
+                rrq = tftpClient.initialiseDownload(pathToFile,0,0);
+            } catch (InstantiationException e1) {
+                e1.printStackTrace();
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
             }
-            else{
-                tftpClient.getFile(pathToFile, directory + "/" + pathToFile,file.getByteSize(),this);
+            try {
+                tftpClient.download(rrq,file1, fileFromTree.getByteSize(),this);
+            } catch (InstantiationException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
+
         }).start();
     }
 
@@ -261,18 +313,35 @@ public class MainWindow extends JFrame {
                 File selectedFile = fc.getSelectedFile();
                 String pathToUploadFile = selectedFile.getAbsolutePath();
                 System.out.println(pathToUploadFile);
-                TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
+                TFTPClient tftpClient = new TFTPClient("localhost");
+
                 String pathToFile = currentPathLbl.getText();
+                WRQ wrq = null;
+
                 actionLbl.setText("Sending...");
-                String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-                if(OS.contains("win")) {
-                    String path = pathToUploadFile.replace("\\", "/");
-                    String[] temp = path.split("/");
-                    tftpClient.sendFile(pathToUploadFile, pathToFile + "\\" + temp[temp.length-1],selectedFile.length(),this);
+
+                String[] temp = pathToUploadFile.split(systemSlashChar);
+                try {
+                    wrq = tftpClient.initialiseUpload(pathToFile + "/" + temp[temp.length-1],0,0);
+                } catch (InstantiationException e1) {
+                    e1.printStackTrace();
+                } catch (UnknownHostException e1) {
+                    e1.printStackTrace();
                 }
-                else{
-                    String[] temp = pathToUploadFile.split("/");
-                    tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1],selectedFile.length(),this);
+                FileInputStream writeFis = null;
+                try {
+                    writeFis = new FileInputStream(new File(pathToUploadFile));
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
+                try {
+                    tftpClient.upload(wrq, writeFis,selectedFile.length(),this);
+                } catch (InstantiationException e1) {
+                    e1.printStackTrace();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
                 }
             }
         }).start();
@@ -287,6 +356,23 @@ public class MainWindow extends JFrame {
     }
 
     private void thisComponentResized(ComponentEvent e) {
+    }
+
+    private void deleteBtnActionPerformed(ActionEvent e) {
+        new Thread(() -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            if(node instanceof FileMutableTreeNode){
+                actionLbl.setText("Deleting...");
+                if(client.deleteFile(currentPathLbl.getText())){
+                    actionLbl.setText("Deleted");
+                }else{
+                    actionLbl.setText("Delete Failed");
+                }
+            }else if(node instanceof DirectoryMutableTreeNode){
+
+            }
+        }).start();
+
     }
 
     private void initComponents() {
@@ -310,6 +396,7 @@ public class MainWindow extends JFrame {
         panel2 = new JPanel();
         uploadBtn = new JButton();
         downloadBtn = new JButton();
+        deleteBtn = new JButton();
         directoryPropPane = new JPanel();
         directoryPropsActionPanel = new JPanel();
         directoryDescLbl = new JLabel();
@@ -453,17 +540,22 @@ public class MainWindow extends JFrame {
 
                 //======== panel2 ========
                 {
-                    panel2.setLayout(new BorderLayout());
+                    panel2.setLayout(new BoxLayout(panel2, BoxLayout.Y_AXIS));
 
                     //---- uploadBtn ----
                     uploadBtn.setText("Upload");
                     uploadBtn.addActionListener(e -> uploadBtnActionPerformed(e));
-                    panel2.add(uploadBtn, BorderLayout.WEST);
+                    panel2.add(uploadBtn);
 
                     //---- downloadBtn ----
                     downloadBtn.setText("Download");
                     downloadBtn.addActionListener(e -> downloadBtnActionPerformed(e));
-                    panel2.add(downloadBtn, BorderLayout.EAST);
+                    panel2.add(downloadBtn);
+
+                    //---- deleteBtn ----
+                    deleteBtn.setText("Delete");
+                    deleteBtn.addActionListener(e -> deleteBtnActionPerformed(e));
+                    panel2.add(deleteBtn);
                 }
                 tftpActionPane.add(panel2, BorderLayout.EAST);
             }
@@ -608,6 +700,7 @@ public class MainWindow extends JFrame {
     private JPanel panel2;
     private JButton uploadBtn;
     private JButton downloadBtn;
+    private JButton deleteBtn;
     private JPanel directoryPropPane;
     private JPanel directoryPropsActionPanel;
     private JLabel directoryDescLbl;
