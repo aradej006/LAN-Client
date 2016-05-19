@@ -220,44 +220,73 @@ public class MainWindow extends JFrame {
     private void thisWindowActivated(WindowEvent e) {
     }
 
-    private void downloadBtnActionPerformed(ActionEvent e) throws IOException {
-        //TODO add your code to download file
+    private void downloadBtnActionPerformed(ActionEvent e) {
+        new Thread(() -> {
+            String directory =  System.getProperty("user.dir");
+            String pathToFile = currentPathLbl.getText();
+            TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
+            String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+            FileMutableTreeNode file = (FileMutableTreeNode)fileTree.getLastSelectedPathComponent();
+            actionLbl.setText("Receiving...");
+            if(OS.contains("win")){
+                System.out.print(directory + "\\" + pathToFile.replace("/", "\\"));
+                tftpClient.getFile(pathToFile, directory + "\\" + pathToFile.replace("/", "\\"),file.getByteSize(),this);
+            }
+            else{
+                tftpClient.getFile(pathToFile, directory + "/" + pathToFile,file.getByteSize(),this);
+            }
+        }).start();
+    }
 
-        String directory =  System.getProperty("user.dir");
-        String pathToFile = currentPathLbl.getText();
-        TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
-        String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-        if(OS.indexOf("win") >= 0){
-            System.out.print(directory + "\\" + pathToFile.replace("/", "\\"));
-            tftpClient.getFile(pathToFile, directory + "\\" + pathToFile.replace("/", "\\"));
+    public void updateDownload(Long received, Long fileSize){
+        Integer progress = ((Double) (new Double(received) / new Double(fileSize) * 100)).intValue();
+        actionLbl.setText("Receiving("+FileMutableTreeNode.humanReadableByteCount(received)+"/"+FileMutableTreeNode.humanReadableByteCount(fileSize)+"-"+progress+" %)");
+        if(progress==100){
+            actionLbl.setText("Received");
         }
-        else{
-            tftpClient.getFile(pathToFile, directory + "/" + pathToFile);
+    }
+
+    public void updateUpload(Long sent, Long fileSize){
+        Integer progress = ((Double) (new Double(sent) / new Double(fileSize) * 100)).intValue();
+        actionLbl.setText("Sending("+FileMutableTreeNode.humanReadableByteCount(sent)+"/"+FileMutableTreeNode.humanReadableByteCount(fileSize)+"-"+progress+" %)");
+        if(progress==100){
+            actionLbl.setText("Sent");
         }
     }
 
     private void uploadBtnActionPerformed(ActionEvent e) {
-        // TODO add your code to upload file
-        JFileChooser fc = new JFileChooser();
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fc.getSelectedFile();
-            String pathToUploadFile = selectedFile.getAbsolutePath();
-            System.out.println(pathToUploadFile);
-            TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
-            String pathToFile = currentPathLbl.getText();
-
-            String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-    		if(OS.indexOf("win") >= 0) {
-                String path = pathToUploadFile.replace("\\", "/");
-                String[] temp = path.split("/");
-                tftpClient.sendFile(pathToUploadFile, pathToFile + "\\" + temp[temp.length-1]);
-
+        new Thread(() -> {
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fc.getSelectedFile();
+                String pathToUploadFile = selectedFile.getAbsolutePath();
+                System.out.println(pathToUploadFile);
+                TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
+                String pathToFile = currentPathLbl.getText();
+                actionLbl.setText("Sending...");
+                String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+                if(OS.contains("win")) {
+                    String path = pathToUploadFile.replace("\\", "/");
+                    String[] temp = path.split("/");
+                    tftpClient.sendFile(pathToUploadFile, pathToFile + "\\" + temp[temp.length-1],selectedFile.length(),this);
+                }
+                else{
+                    String[] temp = pathToUploadFile.split("/");
+                    tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1],selectedFile.length(),this);
+                }
             }
-            else{
-                String[] temp = pathToUploadFile.split("/");
-                tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1]);
-            }
+        }).start();
+    }
+
+    private void homeBtnActionPerformed(ActionEvent e) {
+        try {
+            Desktop.getDesktop().open(new File("root/"));
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
+    }
+
+    private void thisComponentResized(ComponentEvent e) {
     }
 
     private void initComponents() {
@@ -273,6 +302,7 @@ public class MainWindow extends JFrame {
         currentPathLbl = new JLabel();
         buttonsWrapperPane = new JPanel();
         buttonsPane = new JPanel();
+        homeBtn = new JButton();
         connectBtn = new JButton();
         loginBtn = new JButton();
         propPanel = new JPanel();
@@ -318,6 +348,12 @@ public class MainWindow extends JFrame {
             @Override
             public void windowGainedFocus(WindowEvent e) {
                 thisWindowGainedFocus(e);
+            }
+        });
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                thisComponentResized(e);
             }
         });
         Container contentPane = getContentPane();
@@ -378,6 +414,14 @@ public class MainWindow extends JFrame {
                         buttonsPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
                         buttonsPane.setLayout(new FlowLayout());
 
+                        //---- homeBtn ----
+                        homeBtn.setIcon(null);
+                        homeBtn.setMaximumSize(new Dimension(166, 41));
+                        homeBtn.setMinimumSize(new Dimension(166, 41));
+                        homeBtn.setText("Home");
+                        homeBtn.addActionListener(e -> homeBtnActionPerformed(e));
+                        buttonsPane.add(homeBtn);
+
                         //---- connectBtn ----
                         connectBtn.setText("Connect");
                         connectBtn.addActionListener(e -> connectBtnActionPerformed(e));
@@ -418,13 +462,7 @@ public class MainWindow extends JFrame {
 
                     //---- downloadBtn ----
                     downloadBtn.setText("Download");
-                    downloadBtn.addActionListener(e -> {
-                        try {
-                            downloadBtnActionPerformed(e);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    });
+                    downloadBtn.addActionListener(e -> downloadBtnActionPerformed(e));
                     panel2.add(downloadBtn, BorderLayout.EAST);
                 }
                 tftpActionPane.add(panel2, BorderLayout.EAST);
@@ -486,8 +524,17 @@ public class MainWindow extends JFrame {
                 //======== propValuesPanel ========
                 {
                     propValuesPanel.setLayout(new BoxLayout(propValuesPanel, BoxLayout.Y_AXIS));
+
+                    //---- nameLbl ----
+                    nameLbl.setPreferredSize(new Dimension(100, 0));
                     propValuesPanel.add(nameLbl);
+
+                    //---- extensionLbl ----
+                    extensionLbl.setPreferredSize(new Dimension(100, 0));
                     propValuesPanel.add(extensionLbl);
+
+                    //---- sizeLbl ----
+                    sizeLbl.setPreferredSize(new Dimension(100, 0));
                     propValuesPanel.add(sizeLbl);
                 }
                 propFilePane.add(propValuesPanel, BorderLayout.EAST);
@@ -553,6 +600,7 @@ public class MainWindow extends JFrame {
     private JLabel currentPathLbl;
     private JPanel buttonsWrapperPane;
     private JPanel buttonsPane;
+    private JButton homeBtn;
     private JButton connectBtn;
     private JButton loginBtn;
     private JPanel propPanel;

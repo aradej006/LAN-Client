@@ -28,7 +28,11 @@ public class FileMutableTreeNode extends DefaultMutableTreeNode {
         return humanReadableByteCount(size);
     }
 
-    private static String humanReadableByteCount(long bytes) {
+    public Long getByteSize(){
+        return size;
+    }
+
+    public static String humanReadableByteCount(long bytes) {
         int unit = 1024;
         if (bytes < unit) return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(unit));
