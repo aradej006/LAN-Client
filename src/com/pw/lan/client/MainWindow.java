@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.plaf.FileChooserUI;
@@ -225,7 +226,14 @@ public class MainWindow extends JFrame {
         String directory =  System.getProperty("user.dir");
         String pathToFile = currentPathLbl.getText();
         TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
-        tftpClient.getFile(pathToFile, directory + "/" + pathToFile);
+        String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+        if(OS.indexOf("win") >= 0){
+            System.out.print(directory + "\\" + pathToFile.replace("/", "\\"));
+            tftpClient.getFile(pathToFile, directory + "\\" + pathToFile.replace("/", "\\"));
+        }
+        else{
+            tftpClient.getFile(pathToFile, directory + "/" + pathToFile);
+        }
     }
 
     private void uploadBtnActionPerformed(ActionEvent e) {
@@ -237,8 +245,18 @@ public class MainWindow extends JFrame {
             System.out.println(pathToUploadFile);
             TFTPClient tftpClient = new TFTPClient(20000,networkInformation.getIpAddress());
             String pathToFile = currentPathLbl.getText();
-            String[] temp = pathToUploadFile.split("/");
-            tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1]);
+
+            String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+    		if(OS.indexOf("win") >= 0) {
+                String path = pathToUploadFile.replace("\\", "/");
+                String[] temp = path.split("/");
+                tftpClient.sendFile(pathToUploadFile, pathToFile + "\\" + temp[temp.length-1]);
+
+            }
+            else{
+                String[] temp = pathToUploadFile.split("/");
+                tftpClient.sendFile(pathToUploadFile, pathToFile + "/" + temp[temp.length-1]);
+            }
         }
     }
 

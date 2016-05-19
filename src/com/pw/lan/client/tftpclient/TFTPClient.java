@@ -2,6 +2,7 @@ package com.pw.lan.client.tftpclient;
 
 import java.net.*;
 import java.io.*;
+import java.util.Locale;
 
 import com.pw.lan.client.tftp.*;
 import com.pw.lan.client.tftpserver.TFTPServerClient;
@@ -201,19 +202,54 @@ public class TFTPClient extends Thread {
 			
 		}*/
 
-		String[] temp = dest.split("/root/");
-		String[] dirs = temp[1].split("/");
-		String direct=  System.getProperty("user.dir");
-		String temporary = "/root/";
+		String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+		String []temp;
+		String[] dirs;
+		String direct;
+		String temporary;
 		Boolean success;
 
-		for (int i=0;i<dirs.length-1;i++){
-			temporary += dirs[i] +"/";
-			File directory = new File(direct + temporary);
-			if (!directory.exists()){
-				success = directory.mkdir();
-				System.out.println(success);
+
+		if(OS.indexOf("win") >= 0) {
+			String replaceTemp = dest.replace("\\","/");
+			System.out.print(replaceTemp);
+			temp = replaceTemp.split("/root/");
+			dirs = temp[1].split("/");
+			direct = System.getProperty("user.dir");
+			temporary = "\\root\\";
+			if(dirs.length==1){
+				File directory = new File(direct + temporary);
+				if (!directory.exists()) {
+					success = directory.mkdirs();
+					System.out.println(success);
+				}
+			}else {
+				for (int i = 0; i < dirs.length - 1; i++) {
+					temporary += dirs[i] + "\\";
+					File directory = new File(direct + temporary);
+					if (!directory.exists()) {
+						success = directory.mkdirs();
+						System.out.println(success);
+					}
+
+				}
 			}
+		}
+
+		else{
+			temp = dest.split("/root/");
+			dirs = temp[1].split("/");
+			direct = System.getProperty("user.dir");
+			temporary = "/root/";
+			for (int i=0;i<dirs.length-1;i++){
+				temporary += dirs[i] +"/";
+				File directory = new File(direct + temporary);
+				if (!directory.exists()){
+					success = directory.mkdir();
+					System.out.println(success);
+				}
+		}
+
 		}
 
 		try {
