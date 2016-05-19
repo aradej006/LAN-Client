@@ -289,6 +289,23 @@ public class MainWindow extends JFrame {
     private void thisComponentResized(ComponentEvent e) {
     }
 
+    private void deleteBtnActionPerformed(ActionEvent e) {
+        new Thread(() -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            if(node instanceof FileMutableTreeNode){
+                actionLbl.setText("Deleting...");
+                if(client.deleteFile(currentPathLbl.getText())){
+                    actionLbl.setText("Deleted");
+                }else{
+                    actionLbl.setText("Delete Failed");
+                }
+            }else if(node instanceof DirectoryMutableTreeNode){
+
+            }
+        }).start();
+
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - Adrian Radej
@@ -310,6 +327,7 @@ public class MainWindow extends JFrame {
         panel2 = new JPanel();
         uploadBtn = new JButton();
         downloadBtn = new JButton();
+        deleteBtn = new JButton();
         directoryPropPane = new JPanel();
         directoryPropsActionPanel = new JPanel();
         directoryDescLbl = new JLabel();
@@ -453,17 +471,22 @@ public class MainWindow extends JFrame {
 
                 //======== panel2 ========
                 {
-                    panel2.setLayout(new BorderLayout());
+                    panel2.setLayout(new BoxLayout(panel2, BoxLayout.Y_AXIS));
 
                     //---- uploadBtn ----
                     uploadBtn.setText("Upload");
                     uploadBtn.addActionListener(e -> uploadBtnActionPerformed(e));
-                    panel2.add(uploadBtn, BorderLayout.WEST);
+                    panel2.add(uploadBtn);
 
                     //---- downloadBtn ----
                     downloadBtn.setText("Download");
                     downloadBtn.addActionListener(e -> downloadBtnActionPerformed(e));
-                    panel2.add(downloadBtn, BorderLayout.EAST);
+                    panel2.add(downloadBtn);
+
+                    //---- deleteBtn ----
+                    deleteBtn.setText("Delete");
+                    deleteBtn.addActionListener(e -> deleteBtnActionPerformed(e));
+                    panel2.add(deleteBtn);
                 }
                 tftpActionPane.add(panel2, BorderLayout.EAST);
             }
@@ -608,6 +631,7 @@ public class MainWindow extends JFrame {
     private JPanel panel2;
     private JButton uploadBtn;
     private JButton downloadBtn;
+    private JButton deleteBtn;
     private JPanel directoryPropPane;
     private JPanel directoryPropsActionPanel;
     private JLabel directoryDescLbl;

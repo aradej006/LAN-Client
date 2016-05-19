@@ -25,6 +25,7 @@ public class Client implements Runnable {
     private ObjectOutputStream output;
     private String name;
     private boolean loggedIn = false;
+    private boolean removed = false;
     private MainWindow mainWindow;
 
     public void setMainWindow(MainWindow mainWindow) {
@@ -108,6 +109,9 @@ public class Client implements Runnable {
 
                 }else if(msgs.get(Msg.TYPE).toString().equals(Msg.FILES)){
                     mainWindow.updateFilesTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
+                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.DELETEFILE)) {
+                    removed = msgs.get(Msg.DELETERESULT).toString().equals(Msg.DELETECONFIRMED);
+                    this.notify();
                 }
             }else{
                 LOGGER.log(Level.INFO, "Client: Received bad data.");
@@ -157,5 +161,20 @@ public class Client implements Runnable {
         msgs.put(Msg.TYPE, Msg.GETFILES);
         msgs.put(Msg.FILESPATH,filesPath);
         send(msgs);
+    }
+
+    public synchronized boolean deleteFile(String pathToFile){
+        removed = false;
+        Map<String,String> req = new HashMap<>();
+        req.put(Msg.TYPE,Msg.DELETEFILE);
+        req.put(Msg.DELETEPATH,pathToFile);
+        send(req);
+        try {
+            this.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return removed;
+
     }
 }

@@ -4,6 +4,7 @@ package com.pw.lan.client.client;
  * Created by aradej on 2016-05-16.
  */
 public final class Msg {
+
     static final String TYPE = "type";
     static final String HELLO = "hello";
     static final String NAME = "name";
@@ -21,4 +22,10 @@ public final class Msg {
     static final String FILESPATH = "filesPath";
     static final String FILES = "files";
     static final String FILEMAP = "fileMap";
+
+    static final String DELETEFILE = "deleteFile";
+    static final String DELETERESULT = "deleteResult";
+    static final String DELETECONFIRMED ="deleteConfirmed";
+    static final String DELETEFAILED = "deleteFailed";
+    static final String DELETEPATH = "deletePath";
 }

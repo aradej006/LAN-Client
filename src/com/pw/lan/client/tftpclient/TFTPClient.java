@@ -27,10 +27,8 @@ public class TFTPClient extends Thread {
     public TFTPServerClient.TClientRequest request;
 
     public TFTPClient(int port, String ip) {
-
         server_port = port;
         server_ip = ip;
-
         try {
 //            server_socket = new Socket(server_ip, server_port);
             server_socket = SSLSocketFactory.getDefault().createSocket(server_ip,server_port);
@@ -39,7 +37,6 @@ public class TFTPClient extends Thread {
         } catch (IOException ioException) {
             TFTPUtils.fatalError("Unable to create a socket");
         }
-
     }
 
     public boolean sendFile(String filename, String dest,Long fileSize,MainWindow mainWindow) {
