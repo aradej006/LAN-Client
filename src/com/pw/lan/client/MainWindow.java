@@ -262,7 +262,6 @@ public class MainWindow extends JFrame {
                     System.out.println(success);
                 }
             }
-
             RRQ rrq = null;
             FileOutputStream file1 = null;
             try {
