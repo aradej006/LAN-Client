@@ -44,6 +44,12 @@ public class MainWindow extends JFrame {
     private Configuration conf;
     private String systemSlashChar;
 
+    public JProgressBar getjProgressBar() {
+        return jProgressBar;
+    }
+
+    private JProgressBar jProgressBar;
+
     public MainWindow() {
         super("LAN Client App");
         initComponents();
@@ -262,7 +268,6 @@ public class MainWindow extends JFrame {
                     System.out.println(success);
                 }
             }
-
             RRQ rrq = null;
             FileOutputStream file1 = null;
             try {
@@ -419,7 +424,7 @@ public class MainWindow extends JFrame {
         treePane = new JPanel();
         scrollPane1 = new JScrollPane();
         fileTree = new JTree();
-
+        jProgressBar = new JProgressBar(0,10);
         //======== this ========
         addWindowListener(new WindowAdapter() {
             @Override
@@ -639,6 +644,8 @@ public class MainWindow extends JFrame {
         {
             infoPanel.setLayout(new BorderLayout());
             infoPanel.add(actionLbl, BorderLayout.EAST);
+
+            infoPanel.add(jProgressBar);
 
             //---- statusLbl ----
             statusLbl.setText("Disconnected");

@@ -163,6 +163,9 @@ public class TFTPClient
       TFTPSocket tftpSock = new TFTPSocket(5);
 
       this.mainWindow = mainWindow;
+      mainWindow.getjProgressBar().setValue(0);
+      mainWindow.getjProgressBar().setMaximum(fileSize.intValue());
+      mainWindow.getjProgressBar().setStringPainted(true);
 
       int actualDownloadSize = 0;
 
@@ -202,6 +205,8 @@ public class TFTPClient
       {
          // too bad, now we need to work
          receive = (DATA) surprisePacket;
+         actualDownloadSize += receive.getBytes().length;
+         mainWindow.getjProgressBar().setValue(actualDownloadSize);
       }
       
       // write this data to the output stream....                 
@@ -231,6 +236,8 @@ public class TFTPClient
 
          actualDownloadSize += receive.getBytes().length;
          mainWindow.updateDownload(Long.valueOf(actualDownloadSize),fileSize);
+
+         mainWindow.getjProgressBar().setValue(actualDownloadSize);
       }
       // now that the last packet in the file has been sent, the client must sent an 
       // acknowledgement to confirm it has received the last package...or else the server
@@ -271,7 +278,9 @@ public class TFTPClient
       int sequenceNumber = 0;
 
       this.mainWindow = mainWindow;
-
+      mainWindow.getjProgressBar().setValue(0);
+      mainWindow.getjProgressBar().setMaximum(fileSize.intValue());
+      mainWindow.getjProgressBar().setStringPainted(true);
       int actualUploadSize = 0;
 
       ACK receive = new ACK(0);
@@ -322,6 +331,7 @@ public class TFTPClient
 
          actualUploadSize += send.getBytes().length;
          mainWindow.updateUpload(Long.valueOf(actualUploadSize),fileSize);
+         mainWindow.getjProgressBar().setValue(actualUploadSize);
       }                        
       //must remember to close the inputstream!
       is.close();
