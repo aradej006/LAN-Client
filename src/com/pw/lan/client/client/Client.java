@@ -90,6 +90,7 @@ public class Client implements Runnable {
         LOGGER.log(Level.INFO, "Client: Received logout.", name);
         this.close();
         LOGGER.log(Level.INFO, "Client: Thread end.", name);
+        mainWindow.recievedLogout();
     }
 
     private synchronized boolean handle(Object data) {

@@ -4,9 +4,6 @@
 
 package com.pw.lan.client;
 
-import javax.swing.border.*;
-import javax.swing.event.*;
-
 import com.globalros.tftp.client.TFTPClient;
 import com.globalros.tftp.common.RRQ;
 import com.globalros.tftp.common.WRQ;
@@ -16,20 +13,22 @@ import com.pw.lan.client.conf.Configuration;
 import com.pw.lan.client.tree.DirectoryMutableTreeNode;
 import com.pw.lan.client.tree.FileMutableTreeNode;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import javax.swing.*;
-import javax.swing.plaf.FileChooserUI;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 /**
  * @author Adrian Radej
@@ -56,6 +55,7 @@ public class MainWindow extends JFrame {
         downloadBtn.setEnabled(false);
         uploadBtn.setEnabled(false);
         connectBtn.setEnabled(false);
+        deleteBtn.setEnabled(false);
 
         conf = new Configuration();
         conf.readConfiguration();
@@ -167,6 +167,18 @@ public class MainWindow extends JFrame {
         fileTree.setEnabled(true);
     }
 
+    public void updateFilesTree(){
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
+        String filesPath = "";
+        for (TreeNode treeNode : node.getPath()) {
+            filesPath += treeNode.toString() + "/";
+        }
+        filesPath = filesPath.substring(0, filesPath.length()-1);
+        client.getFiles(filesPath);
+        expandingFilesTree = true;
+        actionLbl.setText("Fetching...");
+    }
+
     private void fileTreeTreeExpanded(TreeExpansionEvent e) {
         if (!expandingFilesTree) {
             String filesPath = e.getPath().toString().substring(1, e.getPath().toString().length() - 1).replace(", ", "/") + "/";
@@ -186,6 +198,7 @@ public class MainWindow extends JFrame {
             directoryLbl.setText("");
             permissionLbl.setText("");
             downloadBtn.setEnabled(true);
+            deleteBtn.setEnabled(true);
             uploadBtn.setEnabled(false);
         } else if (n instanceof DirectoryMutableTreeNode) {
             DirectoryMutableTreeNode node = (DirectoryMutableTreeNode) n;
@@ -195,6 +208,7 @@ public class MainWindow extends JFrame {
             extensionLbl.setText("");
             sizeLbl.setText("");
             downloadBtn.setEnabled(false);
+            deleteBtn.setEnabled(false);
             if (node.isCanWrite()) {
                 uploadBtn.setEnabled(true);
             } else {
@@ -206,7 +220,9 @@ public class MainWindow extends JFrame {
             nameLbl.setText("");
             extensionLbl.setText("");
             sizeLbl.setText("");
-            uploadBtn.setEnabled(false);
+            uploadBtn.setEnabled(true);
+            deleteBtn.setEnabled(false);
+            downloadBtn.setEnabled(false);
         }
         String filesPath = e.getPath().toString().substring(1, e.getPath().toString().length() - 1).replace(", ", "/");
         currentPathLbl.setText(filesPath);
@@ -247,7 +263,7 @@ public class MainWindow extends JFrame {
 
             temporary = "root/";
 
-            for (int i = 1; i < dirs.length ; i++) {
+            for (int i = 1; i < dirs.length; i++) {
                 File file = new File(temporary);
                 if (!file.exists()) {
                     success = file.mkdir();
@@ -284,7 +300,7 @@ public class MainWindow extends JFrame {
 
     public void updateDownload(Long received, Long fileSize) {
         Integer progress = ((Double) (new Double(received) / new Double(fileSize) * 100)).intValue();
-        actionLbl.setText("Receiving(" + FileMutableTreeNode.humanReadableByteCount(received) + "/" + FileMutableTreeNode.humanReadableByteCount(fileSize)+")");
+        actionLbl.setText("Receiving(" + FileMutableTreeNode.humanReadableByteCount(received) + "/" + FileMutableTreeNode.humanReadableByteCount(fileSize) + ")");
         progressBar.setValue(progress);
         if (progress >= 100) {
             actionLbl.setText("Received");
@@ -304,41 +320,46 @@ public class MainWindow extends JFrame {
 
     private void uploadBtnActionPerformed(ActionEvent e) {
         new Thread(() -> {
-            JFileChooser fc = new JFileChooser();
+            JFileChooser fc = new JFileChooser("root");
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fc.getSelectedFile();
-                String pathToUploadFile = selectedFile.getAbsolutePath();
-                System.out.println(pathToUploadFile);
-                TFTPClient tftpClient = new TFTPClient(client.getHost());
+                if (selectedFile.length() < 32 * 1024 * 1024) {
+                    String pathToUploadFile = selectedFile.getAbsolutePath();
+                    System.out.println(pathToUploadFile);
+                    TFTPClient tftpClient = new TFTPClient(client.getHost());
 
-                String pathToFile = currentPathLbl.getText();
-                WRQ wrq = null;
+                    String pathToFile = currentPathLbl.getText();
+                    WRQ wrq = null;
 
-                actionLbl.setText("Sending...");
+                    actionLbl.setText("Sending...");
 
-                String temp = pathToUploadFile.substring(pathToUploadFile.lastIndexOf(systemSlashChar)+1);
-                try {
-                    wrq = tftpClient.initialiseUpload(pathToFile + "/" + temp, 0, 0);
-                } catch (InstantiationException e1) {
-                    e1.printStackTrace();
-                } catch (UnknownHostException e1) {
-                    e1.printStackTrace();
+                    String temp = pathToUploadFile.substring(pathToUploadFile.lastIndexOf(systemSlashChar) + 1);
+                    try {
+                        wrq = tftpClient.initialiseUpload(pathToFile + "/" + temp, 0, 0);
+                    } catch (InstantiationException e1) {
+                        e1.printStackTrace();
+                    } catch (UnknownHostException e1) {
+                        e1.printStackTrace();
+                    }
+                    FileInputStream writeFis = null;
+                    try {
+                        writeFis = new FileInputStream(new File(pathToUploadFile));
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
+                    }
+                    try {
+                        tftpClient.upload(wrq, writeFis, selectedFile.length(), this);
+                    } catch (InstantiationException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showConfirmDialog(this, "File is too big. l is 32MB.", "Size Error!", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
                 }
-                FileInputStream writeFis = null;
-                try {
-                    writeFis = new FileInputStream(new File(pathToUploadFile));
-                } catch (FileNotFoundException e1) {
-                    e1.printStackTrace();
-                }
-                try {
-                    tftpClient.upload(wrq, writeFis, selectedFile.length(), this);
-                } catch (InstantiationException e1) {
-                    e1.printStackTrace();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
+
             }
         }).start();
     }
@@ -346,9 +367,9 @@ public class MainWindow extends JFrame {
     private void homeBtnActionPerformed(ActionEvent e) {
         try {
             File root = new File("root");
-            if (!root.exists()){
-                if(!root.mkdir()){
-                    JOptionPane.showConfirmDialog(this,"Root directory cannot be created.","Error! Root directory.",JOptionPane.DEFAULT_OPTION,JOptionPane.ERROR_MESSAGE);
+            if (!root.exists()) {
+                if (!root.mkdir()) {
+                    JOptionPane.showConfirmDialog(this, "Root directory cannot be created.", "Error! Root directory.", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }
@@ -368,6 +389,7 @@ public class MainWindow extends JFrame {
                 actionLbl.setText("Deleting...");
                 if (client.deleteFile(currentPathLbl.getText())) {
                     actionLbl.setText("Deleted");
+                    updateFilesTree();
                 } else {
                     actionLbl.setText("Delete Failed");
                 }
@@ -376,6 +398,16 @@ public class MainWindow extends JFrame {
             }
         }).start();
 
+    }
+
+    public void recievedLogout(){
+        fileTree.setEnabled(false);
+        connectBtn.setText("Connect");
+        loginBtn.setEnabled(false);
+        deleteBtn.setEnabled(false);
+        uploadBtn.setEnabled(false);
+        downloadBtn.setEnabled(false);
+        JOptionPane.showConfirmDialog(this, "Server Disconnect.","Server Message", JOptionPane.DEFAULT_OPTION,JOptionPane.WARNING_MESSAGE);
     }
 
     private void initComponents() {
@@ -387,7 +419,6 @@ public class MainWindow extends JFrame {
         buttonsPanel = new JPanel();
         panel5 = new JPanel();
         currentPathPane = new JPanel();
-        currentPathDescLbl = new JLabel();
         currentPathLbl = new JLabel();
         buttonsWrapperPane = new JPanel();
         buttonsPane = new JPanel();
@@ -470,11 +501,11 @@ public class MainWindow extends JFrame {
         {
 
             // JFormDesigner evaluation mark
-            buttonsPanel.setBorder(new javax.swing.border.CompoundBorder(
-                new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
-                    "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
-                    javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
-                    java.awt.Color.red), buttonsPanel.getBorder())); buttonsPanel.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
+//            buttonsPanel.setBorder(new javax.swing.border.CompoundBorder(
+//                new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
+//                    "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
+//                    javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
+//                    java.awt.Color.red), buttonsPanel.getBorder())); buttonsPanel.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
             buttonsPanel.setLayout(new BorderLayout());
 
@@ -486,13 +517,9 @@ public class MainWindow extends JFrame {
                 {
                     currentPathPane.setLayout(new BorderLayout());
 
-                    //---- currentPathDescLbl ----
-                    currentPathDescLbl.setText("Current Path: ");
-                    currentPathPane.add(currentPathDescLbl, BorderLayout.WEST);
-
                     //---- currentPathLbl ----
                     currentPathLbl.setText("root/");
-                    currentPathPane.add(currentPathLbl, BorderLayout.EAST);
+                    currentPathPane.add(currentPathLbl, BorderLayout.WEST);
                 }
                 panel5.add(currentPathPane, BorderLayout.SOUTH);
 
@@ -687,7 +714,6 @@ public class MainWindow extends JFrame {
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
-
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - Adrian Radej
     private JMenuBar menuBar1;
@@ -696,7 +722,6 @@ public class MainWindow extends JFrame {
     private JPanel buttonsPanel;
     private JPanel panel5;
     private JPanel currentPathPane;
-    private JLabel currentPathDescLbl;
     private JLabel currentPathLbl;
     private JPanel buttonsWrapperPane;
     private JPanel buttonsPane;
