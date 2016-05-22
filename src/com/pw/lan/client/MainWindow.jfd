@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_45" encoding: "UTF-8"
+JFDML JFormDesigner: "5.2.3.0.281" Java: "1.8.0_66" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -190,6 +190,12 @@ new FormModel {
 					"text": "Disconnected"
 				}, new FormLayoutConstraints( class java.lang.String ) {
 					"value": "West"
+				} )
+				add( new FormComponent( "javax.swing.JProgressBar" ) {
+					name: "progressBar"
+					"stringPainted": true
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
 				} )
 			}, new FormLayoutConstraints( class java.lang.String ) {
 				"value": "Last"

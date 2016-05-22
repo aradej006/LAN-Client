@@ -24,6 +24,7 @@ public class Client implements Runnable {
     private ObjectInputStream input;
     private ObjectOutputStream output;
     private String name;
+    private String host;
     private boolean loggedIn = false;
     private boolean removed = false;
     private MainWindow mainWindow;
@@ -33,22 +34,27 @@ public class Client implements Runnable {
     }
 
     public Client(String host, String port) throws Exception {
+        this.host = host;
         System.setProperty("javax.net.ssl.trustStore", "keystore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
         name = InetAddress.getLocalHost().getHostName();
         LOGGER.log(Level.INFO, "Client: Creating client {0}", name);
 //        socket = new Socket(host, Integer.parseInt(port));
-        socket = SSLSocketFactory.getDefault().createSocket(host,Integer.parseInt(port));
+        socket = SSLSocketFactory.getDefault().createSocket(host, Integer.parseInt(port));
         LOGGER.log(Level.INFO, "Client: {0} getting streams...", name);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.flush();
         input = new ObjectInputStream(socket.getInputStream());
         LOGGER.log(Level.INFO, "Client: {0} got streams.", name);
         new Thread(this).start();
-        Map<String,String> map = new HashMap<>();
-        map.put(Msg.TYPE,Msg.HELLO);
+        Map<String, String> map = new HashMap<>();
+        map.put(Msg.TYPE, Msg.HELLO);
         map.put(Msg.NAME, name);
         send(map);
+    }
+
+    public String getHost() {
+        return host;
     }
 
     public synchronized boolean isDisconnected() {
@@ -80,23 +86,23 @@ public class Client implements Runnable {
     }
 
     public void run() {
-        while (handle(receive()));
+        while (handle(receive())) ;
         LOGGER.log(Level.INFO, "Client: Received logout.", name);
         this.close();
         LOGGER.log(Level.INFO, "Client: Thread end.", name);
     }
 
-    private synchronized boolean handle(Object data){
+    private synchronized boolean handle(Object data) {
         if (data == null) {
             return false;
-        } else{
+        } else {
             LOGGER.log(Level.INFO, "Client: Received data : {0}", data.toString());
             if (data instanceof Map) {
                 Map msgs = (Map) data;
-                if(msgs.get(Msg.TYPE).toString().equals(Msg.DO_LOGIN)){
+                if (msgs.get(Msg.TYPE).toString().equals(Msg.DO_LOGIN)) {
                     //do something
-                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)){
-                    if(msgs.get(Msg.LOGINMSG).toString().equals(Msg.LOGINCONFIRMED)){
+                } else if (msgs.get(Msg.TYPE).toString().equals(Msg.LOGINRESULT)) {
+                    if (msgs.get(Msg.LOGINMSG).toString().equals(Msg.LOGINCONFIRMED)) {
                         loggedIn = true;
                         this.notify();
                         msgs = new HashMap<>();
@@ -107,13 +113,13 @@ public class Client implements Runnable {
                         this.notify();
                     }
 
-                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.FILES)){
-                    mainWindow.updateFilesTree(msgs.get(Msg.FILESPATH).toString(),(Map<String,String>)msgs.get(Msg.FILEMAP));
-                }else if(msgs.get(Msg.TYPE).toString().equals(Msg.DELETEFILE)) {
+                } else if (msgs.get(Msg.TYPE).toString().equals(Msg.FILES)) {
+                    mainWindow.updateFilesTree(msgs.get(Msg.FILESPATH).toString(), (Map<String, String>) msgs.get(Msg.FILEMAP));
+                } else if (msgs.get(Msg.TYPE).toString().equals(Msg.DELETEFILE)) {
                     removed = msgs.get(Msg.DELETERESULT).toString().equals(Msg.DELETECONFIRMED);
                     this.notify();
                 }
-            }else{
+            } else {
                 LOGGER.log(Level.INFO, "Client: Received bad data.");
             }
         }
@@ -141,12 +147,12 @@ public class Client implements Runnable {
         }
     }
 
-    public synchronized boolean login(String login, String password){
+    public synchronized boolean login(String login, String password) {
         Map msgs = new HashMap<String, String>();
-        msgs.put(Msg.TYPE,Msg.LOGIN);
-        msgs.put(Msg.LOGIN,login);
-        msgs.put(Msg.PASSWORD,password);
-        msgs.put(Msg.ALGORITHM,"SHA-256");
+        msgs.put(Msg.TYPE, Msg.LOGIN);
+        msgs.put(Msg.LOGIN, login);
+        msgs.put(Msg.PASSWORD, password);
+        msgs.put(Msg.ALGORITHM, "SHA-256");
         send(msgs);
         try {
             this.wait();
@@ -156,18 +162,18 @@ public class Client implements Runnable {
         return loggedIn;
     }
 
-    public void getFiles(String filesPath){
-        Map<String,String> msgs = new HashMap<>();
+    public void getFiles(String filesPath) {
+        Map<String, String> msgs = new HashMap<>();
         msgs.put(Msg.TYPE, Msg.GETFILES);
-        msgs.put(Msg.FILESPATH,filesPath);
+        msgs.put(Msg.FILESPATH, filesPath);
         send(msgs);
     }
 
-    public synchronized boolean deleteFile(String pathToFile){
+    public synchronized boolean deleteFile(String pathToFile) {
         removed = false;
-        Map<String,String> req = new HashMap<>();
-        req.put(Msg.TYPE,Msg.DELETEFILE);
-        req.put(Msg.DELETEPATH,pathToFile);
+        Map<String, String> req = new HashMap<>();
+        req.put(Msg.TYPE, Msg.DELETEFILE);
+        req.put(Msg.DELETEPATH, pathToFile);
         send(req);
         try {
             this.wait();

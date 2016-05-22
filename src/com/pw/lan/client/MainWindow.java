@@ -44,12 +44,6 @@ public class MainWindow extends JFrame {
     private Configuration conf;
     private String systemSlashChar;
 
-    public JProgressBar getjProgressBar() {
-        return jProgressBar;
-    }
-
-    private JProgressBar jProgressBar;
-
     public MainWindow() {
         super("LAN Client App");
         initComponents();
@@ -69,7 +63,7 @@ public class MainWindow extends JFrame {
         checkOS();
     }
 
-    private void resetTree(){
+    private void resetTree() {
         DefaultTreeModel model = (DefaultTreeModel) fileTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
         root.removeAllChildren();
@@ -77,6 +71,7 @@ public class MainWindow extends JFrame {
         model.reload(root);
         fileTree.setEnabled(false);
     }
+
     private void networkMenuActionPerformed(ActionEvent e) {
         networkWindowOpened = true;
         this.setEnabled(false);
@@ -231,9 +226,9 @@ public class MainWindow extends JFrame {
     private void thisWindowActivated(WindowEvent e) {
     }
 
-    public void checkOS(){
+    public void checkOS() {
         String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-        if(OS.contains("win"))
+        if (OS.contains("win"))
             systemSlashChar = "\\";
         else
             systemSlashChar = "/";
@@ -241,51 +236,43 @@ public class MainWindow extends JFrame {
 
     private void downloadBtnActionPerformed(ActionEvent e) {
         new Thread(() -> {
-            String directory =  System.getProperty("user.dir");
             String pathToFile = currentPathLbl.getText();
-            FileMutableTreeNode fileFromTree = (FileMutableTreeNode)fileTree.getLastSelectedPathComponent();
-            TFTPClient tftpClient = new TFTPClient("localhost");
+            FileMutableTreeNode fileFromTree = (FileMutableTreeNode) fileTree.getLastSelectedPathComponent();
+            TFTPClient tftpClient = new TFTPClient(client.getHost());
 
-            String[] temp;
             String[] dirs;
-            String direct;
             String temporary;
             Boolean success;
-            String dest = directory + systemSlashChar + pathToFile;
+            dirs = pathToFile.split("/");
 
-            temp = dest.split(systemSlashChar + "root" + systemSlashChar);
-            dirs = temp[1].split(systemSlashChar);
+            temporary = "root/";
 
-            direct = System.getProperty("user.dir");
-
-            temporary = systemSlashChar + "root" + systemSlashChar;
-
-            for (int i = 0; i < dirs.length - 1; i++) {
-                temporary += dirs[i] + systemSlashChar;
-                File file = new File(direct + temporary);
+            for (int i = 1; i < dirs.length ; i++) {
+                File file = new File(temporary);
                 if (!file.exists()) {
                     success = file.mkdir();
-                    System.out.println(success);
+                    System.out.println(success + " " + temporary);
                 }
+                temporary += dirs[i] + "/";
             }
             RRQ rrq = null;
             FileOutputStream file1 = null;
             try {
-                 file1 = new FileOutputStream(new File(dest));
+                file1 = new FileOutputStream(new File(pathToFile));
             } catch (FileNotFoundException e1) {
                 e1.printStackTrace();
             }
 
             actionLbl.setText("Receiving...");
             try {
-                rrq = tftpClient.initialiseDownload(pathToFile,0,0);
+                rrq = tftpClient.initialiseDownload(pathToFile, 0, 0);
             } catch (InstantiationException e1) {
                 e1.printStackTrace();
             } catch (UnknownHostException e1) {
                 e1.printStackTrace();
             }
             try {
-                tftpClient.download(rrq,file1, fileFromTree.getByteSize(),this);
+                tftpClient.download(rrq, file1, fileFromTree.getByteSize(), this);
             } catch (InstantiationException e1) {
                 e1.printStackTrace();
             } catch (IOException e1) {
@@ -295,18 +282,22 @@ public class MainWindow extends JFrame {
         }).start();
     }
 
-    public void updateDownload(Long received, Long fileSize){
+    public void updateDownload(Long received, Long fileSize) {
         Integer progress = ((Double) (new Double(received) / new Double(fileSize) * 100)).intValue();
-        actionLbl.setText("Receiving("+FileMutableTreeNode.humanReadableByteCount(received)+"/"+FileMutableTreeNode.humanReadableByteCount(fileSize)+"-"+progress+" %)");
-        if(progress==100){
+        actionLbl.setText("Receiving(" + FileMutableTreeNode.humanReadableByteCount(received) + "/" + FileMutableTreeNode.humanReadableByteCount(fileSize)+")");
+        progressBar.setValue(progress);
+        if (progress >= 100) {
             actionLbl.setText("Received");
+            progressBar.setValue(100);
         }
     }
 
-    public void updateUpload(Long sent, Long fileSize){
+    public void updateUpload(Long sent, Long fileSize) {
         Integer progress = ((Double) (new Double(sent) / new Double(fileSize) * 100)).intValue();
-        actionLbl.setText("Sending("+FileMutableTreeNode.humanReadableByteCount(sent)+"/"+FileMutableTreeNode.humanReadableByteCount(fileSize)+"-"+progress+" %)");
-        if(progress==100){
+        actionLbl.setText("Sending(" + FileMutableTreeNode.humanReadableByteCount(sent) + "/" + FileMutableTreeNode.humanReadableByteCount(fileSize) + ")");
+        progressBar.setValue(progress);
+        if (progress >= 100) {
+            progressBar.setValue(100);
             actionLbl.setText("Sent");
         }
     }
@@ -318,16 +309,16 @@ public class MainWindow extends JFrame {
                 File selectedFile = fc.getSelectedFile();
                 String pathToUploadFile = selectedFile.getAbsolutePath();
                 System.out.println(pathToUploadFile);
-                TFTPClient tftpClient = new TFTPClient("localhost");
+                TFTPClient tftpClient = new TFTPClient(client.getHost());
 
                 String pathToFile = currentPathLbl.getText();
                 WRQ wrq = null;
 
                 actionLbl.setText("Sending...");
 
-                String[] temp = pathToUploadFile.split(systemSlashChar);
+                String temp = pathToUploadFile.substring(pathToUploadFile.lastIndexOf(systemSlashChar)+1);
                 try {
-                    wrq = tftpClient.initialiseUpload(pathToFile + "/" + temp[temp.length-1],0,0);
+                    wrq = tftpClient.initialiseUpload(pathToFile + "/" + temp, 0, 0);
                 } catch (InstantiationException e1) {
                     e1.printStackTrace();
                 } catch (UnknownHostException e1) {
@@ -340,7 +331,7 @@ public class MainWindow extends JFrame {
                     e1.printStackTrace();
                 }
                 try {
-                    tftpClient.upload(wrq, writeFis,selectedFile.length(),this);
+                    tftpClient.upload(wrq, writeFis, selectedFile.length(), this);
                 } catch (InstantiationException e1) {
                     e1.printStackTrace();
                 } catch (IOException e1) {
@@ -354,7 +345,14 @@ public class MainWindow extends JFrame {
 
     private void homeBtnActionPerformed(ActionEvent e) {
         try {
-            Desktop.getDesktop().open(new File("root/"));
+            File root = new File("root");
+            if (!root.exists()){
+                if(!root.mkdir()){
+                    JOptionPane.showConfirmDialog(this,"Root directory cannot be created.","Error! Root directory.",JOptionPane.DEFAULT_OPTION,JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Desktop.getDesktop().open(root);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -366,14 +364,14 @@ public class MainWindow extends JFrame {
     private void deleteBtnActionPerformed(ActionEvent e) {
         new Thread(() -> {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
-            if(node instanceof FileMutableTreeNode){
+            if (node instanceof FileMutableTreeNode) {
                 actionLbl.setText("Deleting...");
-                if(client.deleteFile(currentPathLbl.getText())){
+                if (client.deleteFile(currentPathLbl.getText())) {
                     actionLbl.setText("Deleted");
-                }else{
+                } else {
                     actionLbl.setText("Delete Failed");
                 }
-            }else if(node instanceof DirectoryMutableTreeNode){
+            } else if (node instanceof DirectoryMutableTreeNode) {
 
             }
         }).start();
@@ -421,10 +419,11 @@ public class MainWindow extends JFrame {
         infoPanel = new JPanel();
         actionLbl = new JLabel();
         statusLbl = new JLabel();
+        progressBar = new JProgressBar();
         treePane = new JPanel();
         scrollPane1 = new JScrollPane();
         fileTree = new JTree();
-        jProgressBar = new JProgressBar(0,10);
+
         //======== this ========
         addWindowListener(new WindowAdapter() {
             @Override
@@ -645,11 +644,13 @@ public class MainWindow extends JFrame {
             infoPanel.setLayout(new BorderLayout());
             infoPanel.add(actionLbl, BorderLayout.EAST);
 
-            infoPanel.add(jProgressBar);
-
             //---- statusLbl ----
             statusLbl.setText("Disconnected");
             infoPanel.add(statusLbl, BorderLayout.WEST);
+
+            //---- progressBar ----
+            progressBar.setStringPainted(true);
+            infoPanel.add(progressBar, BorderLayout.SOUTH);
         }
         contentPane.add(infoPanel, BorderLayout.PAGE_END);
 
@@ -727,6 +728,7 @@ public class MainWindow extends JFrame {
     private JPanel infoPanel;
     private JLabel actionLbl;
     private JLabel statusLbl;
+    private JProgressBar progressBar;
     private JPanel treePane;
     private JScrollPane scrollPane1;
     private JTree fileTree;
