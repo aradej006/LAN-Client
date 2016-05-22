@@ -305,7 +305,7 @@ public class TFTPClient {
         }
         //must remember to close the inputstream!
         is.close();
-
+        mainWindow.updateFilesTree();
         return true;
     }
 

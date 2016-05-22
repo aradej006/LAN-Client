@@ -16,16 +16,10 @@ new FormModel {
 					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 						name: "currentPathPane"
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "currentPathDescLbl"
-							"text": "Current Path: "
-						}, new FormLayoutConstraints( class java.lang.String ) {
-							"value": "West"
-						} )
-						add( new FormComponent( "javax.swing.JLabel" ) {
 							name: "currentPathLbl"
 							"text": "root/"
 						}, new FormLayoutConstraints( class java.lang.String ) {
-							"value": "East"
+							"value": "West"
 						} )
 					}, new FormLayoutConstraints( class java.lang.String ) {
 						"value": "South"
